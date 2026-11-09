@@ -165,11 +165,11 @@ class PremiumOrchestrator:
         is_technical: bool,
         add_end_screen: bool = True,
     ) -> List[Scene]:
-        scenes: List[Scene] = []
+        """Build scenes with proper cumulative timing and transitions."""
+        raw_scenes: List[Scene] = []
         n = len(segments)
 
         for i, seg in enumerate(segments):
-            # Determine scene type
             if i == 0:
                 stype = "hook"
                 audio_cue = "pop"
@@ -210,33 +210,53 @@ class PremiumOrchestrator:
             scene.warnings = ds_validate({
                 "type": stype, "duration": seg["duration"], "text": seg["text"]
             })
-            scenes.append(scene)
-
-            # Insert premium transition before animation/CTA scenes
-            for j in range(len(scenes) - 1, 0, -1):
-                prev = scenes[j - 1]
-                curr = scenes[j]
-                if curr.needs_animation or curr.scene_type == "cta":
-                    trans = Scene(
-                        start=prev.end, end=prev.end + 0.6, duration=0.6,
-                        text="", scene_type="transition",
-                        transition_kind="wipe",
-                    )
-                    scenes.insert(j, trans)
+            raw_scenes.append(scene)
 
         # Premium end screen
-        if add_end_screen and scenes:
-            last = scenes[-1]
-            scenes.append(Scene(
+        if add_end_screen and raw_scenes:
+            last = raw_scenes[-1]
+            raw_scenes.append(Scene(
                 start=last.end, end=last.end + 5.0, duration=5.0,
                 text="Subscribe for more",
                 scene_type="end_screen",
                 audio_cue="ding",
             ))
 
-        return scenes
+        # Build final list with transitions and cumulative timing
+        scenes: List[Scene] = []
+        cursor = 0.0
+        TRANSITION_DUR = 0.6
 
-    # ── 4. Assemble HTML ────────────────────────────────────────────
+        for i, sc in enumerate(raw_scenes):
+            # Reset scene timing to cursor
+            sc.start = cursor
+            sc.end = cursor + sc.duration
+            cursor = sc.end
+
+            scenes.append(sc)
+
+            # Insert transition before animation/CTA scenes (but not the first scene)
+            is_first = (i == 0)
+            needs_transition_before = (
+                not is_first and
+                (sc.needs_animation or sc.scene_type == "cta")
+            )
+            if needs_transition_before:
+                # The transition goes BETWEEN previous scene and this one.
+                # Since we already added sc, insert transition before it.
+                trans_start = scenes[-2].end if len(scenes) >= 2 else 0.0
+                trans = Scene(
+                    start=trans_start, end=trans_start + TRANSITION_DUR,
+                    duration=TRANSITION_DUR, text="", scene_type="transition",
+                    transition_kind="wipe",
+                )
+                scenes.insert(-1, trans)
+                # Shift this scene (and all after) by transition duration
+                sc.start += TRANSITION_DUR
+                sc.end += TRANSITION_DUR
+                cursor += TRANSITION_DUR
+
+        return scenes    # ── 4. Assemble HTML ────────────────────────────────────────────
     def assemble(
         self,
         scenes: List[Scene],
@@ -300,10 +320,8 @@ class PremiumOrchestrator:
         if sc.needs_animation:
             return tor_diagram_html(
                 duration=sc.duration, start=sc.start, track=10, topic=topic,
-            ) + (glass_evidence_card_html(
-                f"{sc.start}-{sc.end}s", sc.text, sc.evidence_sources,
-                duration=sc.duration, start=sc.start, track=50,
-            ) if sc.needs_evidence else "")
+                evidence_sources=sc.evidence_sources if sc.needs_evidence else None,
+            )
         if sc.needs_evidence:
             return glass_evidence_card_html(
                 f"{sc.start}-{sc.end}s", sc.text, sc.evidence_sources,
@@ -387,7 +405,7 @@ class PremiumOrchestrator:
 
         report = BuildReport(
             total_scenes=len(scenes),
-            total_duration=segments[-1]["end"] if segments else 0.0,
+            total_duration=scenes[-1].end if scenes else 0.0,
             animations_inserted=sum(1 for s in scenes if s.needs_animation),
             evidence_blocks=sum(1 for s in scenes if s.needs_evidence),
             transitions=sum(1 for s in scenes if s.scene_type == "transition"),

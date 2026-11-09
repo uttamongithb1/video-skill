@@ -1,15 +1,15 @@
 """
-Premium Animations — v3.0
-==========================
+Premium Animations — v3.2 (FIXED)
+==================================
 
-Kinetic typography, SVG technical diagrams with Ken Burns camera moves,
-glassmorphism evidence cards, lower thirds, end screens, and motion-blur
-transitions. All pure HTML/CSS/SVG for HyperFrames deterministic rendering.
+Self-contained inline styles so every kinetic word actually staggers.
+No invalid HTML attributes. SVG packet duration matched to scene.
+TOR diagram can include evidence overlay inside the same scene.
 """
 
 from __future__ import annotations
 
-from design_system import PALETTE, MOTION, TYPOGRAPHY, LAYOUT, ALIGNMENT_RULES
+from design_system import PALETTE, MOTION, TYPOGRAPHY, LAYOUT
 
 P = PALETTE
 M = MOTION
@@ -17,51 +17,40 @@ T = TYPOGRAPHY
 L = LAYOUT
 
 
-def kinetic_words(
-    text: str,
-    style: str = "pop",
-    stagger: float = None,
-    duration: float = None,
-    color: str = None,
-) -> str:
-    """
-    Wrap text in per-word <span> tags with kinetic animation classes.
-    style: 'pop' | 'slide-left' | 'slide-right' | 'scale'
-    Returns HTML with inline style for animation-delay per word.
-    """
-    stagger = stagger or M["stagger"]
-    dur = duration or M["pop_in"]
-    col = color or P["cream"]
+def _word_span(word: str, delay_s: float, dur_s: float, color: str,
+               weight: str = "750", style_name: str = "pop") -> str:
+    """Single <span> with complete inline animation."""
+    if style_name == "pop":
+        anim = f"popIn {dur_s}s {M['ease_premium']} forwards {delay_s}s"
+    elif style_name == "slide-left":
+        anim = f"slideInLeft {dur_s}s {M['ease_premium']} forwards {delay_s}s"
+    elif style_name == "slide-right":
+        anim = f"slideInRight {dur_s}s {M['ease_premium']} forwards {delay_s}s"
+    else:
+        anim = f"scaleReveal {dur_s}s {M['ease_premium']} forwards {delay_s}s"
 
-    word_cls = {
-        "pop": "word-kinetic",
-        "slide-left": "word-slide-l",
-        "slide-right": "word-slide-r",
-        "scale": "word-kinetic",
-    }.get(style, "word-kinetic")
+    return (
+        f'<span style="display:inline-block; opacity:0; animation:{anim}; '
+        f'color:{color}; font-weight:{weight};">{word}</span>'
+    )
 
+
+def kinetic_words(text: str, style: str = "pop", stagger: float = 0.12,
+                  duration: float = 0.45, color: str = None,
+                  weight: str = "750") -> str:
+    """Per-word spans, each with its own inline animation-delay — true kinetic type."""
+    color = color or P["cream"]
     words = text.split()
-    spans = []
-    for i, w in enumerate(words):
-        delay = i * float(stagger.rstrip("s"))
-        spans.append(
-            f'<span class="{word_cls}" '
-            f'style="--d:{dur}; --delay:{delay}s; color:{col};" '
-            f'animation-delay="{delay}s">{w}</span>'
-        )
-
-    return " ".join(spans)
+    return " ".join(
+        _word_span(w, i * stagger, duration, color, weight, style)
+        for i, w in enumerate(words)
+    )
 
 
-def kinetic_hook_html(
-    text: str,
-    emoji: str = "😩",
-    duration: float = 4.0,
-    start: float = 0.0,
-    track: int = 1,
-) -> str:
+def kinetic_hook_html(text: str, emoji: str = "😩", duration: float = 4.0,
+                      start: float = 0.0, track: int = 1) -> str:
     """Premium hook: kinetic pop-in words + emoji, centered top band."""
-    words_html = kinetic_words(text, style="pop", color="var(--cream)")
+    words_html = kinetic_words(text, style="pop", duration=0.45, color="var(--cream)")
     return f"""
   <div class="scene hook" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
     <div class="text-safe">
@@ -70,58 +59,41 @@ def kinetic_hook_html(
                   text-align: center; margin-bottom: 32px;">
         {words_html}
       </div>
-      <div style="font-size: 64px; opacity: 0; animation: popIn 0.6s var(--ease-premium) forwards 1.2s;">
+      <div style="font-size: 64px; opacity:0; animation:popIn 0.6s {M['ease_premium']} forwards 1.2s;">
         {emoji}
       </div>
     </div>
   </div>"""
 
 
-def kinetic_section_html(
-    text: str,
-    duration: float = 3.0,
-    start: float = 0.0,
-    track: int = 2,
-) -> str:
+def kinetic_section_html(text: str, duration: float = 3.0,
+                         start: float = 0.0, track: int = 2) -> str:
     """Premium section header: scale reveal, centered."""
-    words_html = kinetic_words(text, style="scale", color="var(--ink)")
+    words_html = kinetic_words(text, style="scale", duration=0.5, color="var(--ink)")
     return f"""
   <div class="scene section" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
     <div class="text-safe" style="color: var(--ink);">
       <div style="font-size: {T['section']['size']}; font-weight: {T['section']['weight']};
                   line-height: {T['section']['line_height']}; letter-spacing: {T['section']['tracking']};
-                  text-align: center; animation: scaleReveal 0.7s var(--ease-premium) forwards;">
+                  text-align: center;">
         {words_html}
       </div>
     </div>
   </div>"""
 
 
-def body_line_html(
-    text: str,
-    align: str = "left",
-    emphasis_word: str = None,
-    duration: float = 3.0,
-    start: float = 0.0,
-    track: int = 2,
-) -> str:
-    """
-    Premium body line: slide-in from left or right.
-    emphasis_word: if provided, that word renders in brand color + weight 950.
-    """
-    # Build word spans with optional emphasis
+def body_line_html(text: str, align: str = "left", emphasis_word: str = None,
+                   duration: float = 3.0, start: float = 0.0,
+                   track: int = 2) -> str:
+    """Premium body line: slide-in from left or right. Emphasis word in brand color."""
     words = text.split()
     spans = []
     for i, w in enumerate(words):
         is_emph = emphasis_word and w.strip(".,!?").lower() == emphasis_word.lower()
-        cls = "word-slide-l" if align == "left" else "word-slide-r"
+        style_name = "slide-left" if align == "left" else "slide-right"
         col = "var(--maroon)" if is_emph else "var(--ink-soft)"
         wt = "950" if is_emph else T["body"]["weight"]
-        delay = i * 0.12
-        spans.append(
-            f'<span class="{cls}" style="--d:0.7s; --delay:{delay}s; color:{col}; '
-            f'font-weight:{wt};" animation-delay="{delay}s">{w}</span>'
-        )
+        spans.append(_word_span(w, i * 0.12, 0.6, col, wt, style_name))
     words_html = " ".join(spans)
 
     side_class = "body_left" if align == "left" else "body_right"
@@ -138,15 +110,46 @@ def body_line_html(
   </div>"""
 
 
-def tor_diagram_html(
-    duration: float = 5.0,
-    start: float = 0.0,
-    track: int = 10,
-    topic: str = "Tor",
-) -> str:
+def _evidence_overlay_html(topic: str, evidence_sources: list) -> str:
+    """Glassmorphism evidence card rendered inside the animation scene."""
+    badges = "".join(
+        f'<span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600;'
+        f' color:var(--maroon); background:rgba(255,215,0,0.15); padding:6px 14px;'
+        f' border-radius:10px; margin-right:8px;">[{s.get("platform","SOURCE").upper()}]'
+        f' {s.get("caption","source")}</span>'
+        for s in evidence_sources
+    )
+    return f'''
+    <div style="
+        position: absolute; bottom: 110px; left: 100px; right: 100px;
+        background: rgba(255,255,255,0.65); backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.4); border-radius: 20px;
+        color: var(--ink); padding: 24px 32px; max-width: 1080px;
+        font-family: var(--font-display); font-size: 30px; font-weight: 800;
+        text-align: center; box-shadow: 0 20px 60px rgba(108,0,19,0.25);
+        animation: slideUp 0.7s {M['ease_premium']} forwards 0.3s; opacity: 0;">
+      <div style="font-size: 30px; font-weight: 800; margin-bottom: 12px;
+                  border-left: 5px solid var(--maroon); padding-left: 16px;">
+        {topic.upper()} — verified architecture
+      </div>
+      <div style="font-size: 24px; font-weight: 600; margin-bottom: 10px;">EVIDENCE</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
+        {badges}
+      </div>
+      <div style="margin-top: 14px; font-size: 20px; font-weight: 600; opacity: 0.7;
+                  border-top: 1px solid rgba(255,255,255,0.4); padding-top: 10px;">
+        Sources: {', '.join(s.get('platform','') for s in evidence_sources)}
+      </div>
+    </div>'''
+
+
+def tor_diagram_html(duration: float = 5.0, start: float = 0.0,
+                     track: int = 10, topic: str = "Tor",
+                     evidence_sources: list = None) -> str:
     """
-    Premium TOR diagram: SVG node-link with Ken Burns camera move,
-    animated encrypted packet, glass caption overlay.
+    Premium TOR diagram: SVG node-link + Ken Burns + animated packet.
+    Optionally includes evidence overlay inside the same scene.
     """
     w, h = L["canvas_w"], L["canvas_h"]
     cx = [120, 400, 680, 960, 1160]
@@ -155,6 +158,7 @@ def tor_diagram_html(
     sub = ["You", "ISP", "Entry Relay", "Middle Relay", "Exit Relay"]
     node_r = 44
     packet_r = 14
+    pkt_dur = min(duration, 4.0)
 
     points = " ".join(f"{cx[i]},{cy}" for i in range(5))
     circles = "".join(
@@ -170,8 +174,10 @@ def tor_diagram_html(
         for i in range(5)
     )
 
+    evidence_overlay = _evidence_overlay_html(topic, evidence_sources) if evidence_sources else ""
+
     return f"""
-  <div class="scene animation scene-ken-burns" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
+  <div class="scene animation" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
     <div class="animation-wrapper" style="width:100%;height:100%;display:flex;
         align-items:center;justify-content:center;background:var(--maroon);overflow:hidden;">
       <svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg"
@@ -197,38 +203,24 @@ def tor_diagram_html(
         {labels_html}
         {sub_html}
         <circle class="packet" cx="{cx[0]}" cy="{cy}" r="{packet_r}">
-          <animateMotion path="M {points}" dur="{M['ken_burns']}" repeatCount="indefinite" />
+          <animateMotion path="M {points}" dur="{pkt_dur}s" repeatCount="indefinite" />
         </circle>
       </svg>
     </div>
-    <div class="glass-card" style="
-        position: absolute; bottom: 110px; left: 100px; right: 100px;
-        color: var(--ink); padding: 24px 32px; max-width: 1080px;
-        font-family: var(--font-display); font-size: 30px; font-weight: 800;
-        text-align: center; box-shadow: var(--shadow-hard);">
-      {topic.upper()} — encrypted path through independent relays
-    </div>
+    {evidence_overlay}
   </div>"""
 
 
-def glass_evidence_card_html(
-    timestamp: str,
-    claim: str,
-    sources: list,
-    duration: float = 5.0,
-    start: float = 0.0,
-    track: int = 50,
-) -> str:
-    """
-    Premium evidence card: glassmorphism, claim + media placeholder +
-    source citations with platform badges.
-    """
-    dur = timestamp.replace("s", "").split("-")
-    scene_dur = float(dur[1]) - float(dur[0]) if len(dur) == 2 else duration
+def glass_evidence_card_html(timestamp: str, claim: str, sources: list,
+                             duration: float = 5.0, start: float = 0.0,
+                             track: int = 50) -> str:
+    """Standalone premium evidence card (glassmorphism + citations)."""
+    dur_parts = timestamp.replace("s", "").split("-")
+    scene_dur = float(dur_parts[1]) - float(dur_parts[0]) if len(dur_parts) == 2 else duration
 
     source_badges = "".join(
         f'<span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600;'
-        f' color:var(--maroon); background:var(--gold-soft); padding:6px 14px;'
+        f' color:var(--maroon); background:rgba(255,215,0,0.15); padding:6px 14px;'
         f' border-radius:10px; margin-right:8px;">[{s.get("platform","SOURCE").upper()}]'
         f' {s.get("caption","source")}</span>'
         for s in sources
@@ -236,10 +228,14 @@ def glass_evidence_card_html(
 
     return f"""
   <div class="scene evidence" data-start="{start:.2f}" data-duration="{scene_dur:.2f}" data-track-index="{track}">
-    <div class="glass-card" style="
-        position: absolute; bottom: 90px; left: 100px; right: 100px;
-        color: var(--ink); padding: 32px 40px; max-width: 1080px;
-        font-family: var(--font-display); box-shadow: var(--shadow-hard);">
+    <div style="position: absolute; bottom: 90px; left: 100px; right: 100px;
+                background: rgba(255,255,255,0.65); backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,0.4); border-radius: 20px;
+                color: var(--ink); padding: 32px 40px; max-width: 1080px;
+                font-family: var(--font-display);
+                box-shadow: 0 20px 60px rgba(108,0,19,0.25);
+                animation: slideUp 0.7s {M['ease_premium']} forwards 0.2s; opacity: 0;">
       <div style="font-size: {T['lower_third']['size']}; font-weight: {T['lower_third']['weight']};
                   line-height: {T['lower_third']['line_height']}; margin-bottom: 18px;
                   border-left: 5px solid var(--maroon); padding-left: 16px;">
@@ -258,27 +254,26 @@ def glass_evidence_card_html(
         {source_badges}
       </div>
       <div style="margin-top: 14px; font-size: 20px; font-weight: 600; opacity: 0.7;
-                  border-top: 1px solid var(--glass-border); padding-top: 10px;">
+                  border-top: 1px solid rgba(255,255,255,0.4); padding-top: 10px;">
         Verified sources: {', '.join(s.get('platform','') for s in sources)}
       </div>
     </div>
   </div>"""
 
 
-def lower_third_html(
-    label: str,
-    value: str,
-    duration: float = 4.0,
-    start: float = 0.0,
-    track: int = 60,
-) -> str:
+def lower_third_html(label: str, value: str, duration: float = 4.0,
+                     start: float = 0.0, track: int = 60) -> str:
     """Premium lower third: slide-up glass card, bottom left."""
     return f"""
   <div class="scene lower_third" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
-    <div class="glass-dark-card" style="
-        position: absolute; bottom: 70px; left: 100px;
-        color: var(--cream); padding: 16px 28px; max-width: 560px;
-        font-family: var(--font-display); box-shadow: var(--shadow-hard);">
+    <div style="position: absolute; bottom: 70px; left: 100px;
+                background: rgba(108,0,19,0.7); backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255,255,255,0.4); border-radius: 20px;
+                color: var(--cream); padding: 16px 28px; max-width: 560px;
+                font-family: var(--font-display);
+                box-shadow: 0 20px 60px rgba(108,0,19,0.25);
+                animation: slideUp 0.7s {M['ease_premium']} forwards 0.2s; opacity: 0;">
       <div style="font-size: 22px; font-weight: 700; color: var(--gold); text-transform: uppercase;
                   letter-spacing: 0.05em; margin-bottom: 4px;">{label}</div>
       <div style="font-size: 32px; font-weight: 800; line-height: 1.1;">{value}</div>
@@ -286,62 +281,34 @@ def lower_third_html(
   </div>"""
 
 
-def end_screen_html(
-    cta_text: str,
-    duration: float = 5.0,
-    start: float = 0.0,
-    track: int = 90,
-) -> str:
+def end_screen_html(cta_text: str, duration: float = 5.0,
+                    start: float = 0.0, track: int = 90) -> str:
     """Premium end screen: fade in, centered CTA + subscribe placeholder."""
+    words_html = kinetic_words(cta_text, style="scale", duration=0.5, color="var(--cream)")
     return f"""
   <div class="scene end_screen" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
     <div class="text-safe">
       <div style="font-size: {T['cta']['size']}; font-weight: {T['cta']['weight']};
                   line-height: {T['cta']['line_height']}; letter-spacing: {T['cta']['tracking']};
-                  text-align: center; color: var(--cream); margin-bottom: 32px;
-                  animation: scaleReveal 0.8s var(--ease-premium) forwards;">
-        {kinetic_words(cta_text, style='scale', color='var(--cream)')}
+                  text-align: center; color: var(--cream); margin-bottom: 32px;">
+        {words_html}
       </div>
       <div style="font-size: 28px; font-weight: 600; color: var(--gold);
-                  animation: popIn 0.6s var(--ease-premium) forwards 1s;">
+                  opacity:0; animation:popIn 0.6s {M['ease_premium']} forwards 1s;">
         Subscribe for more
       </div>
     </div>
   </div>"""
 
 
-def scene_transition_html(
-    kind: str = "wipe",
-    duration: float = 0.6,
-    start: float = 0.0,
-    track: int = 99,
-) -> str:
-    """Premium transition: motion-blur wipe or blur fade."""
-    if kind == "blur":
-        return f"""
-  <div class="transition-wipe" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
-    <style>
-      .transition-wipe {{
-        background: var(--maroon);
-        animation: motionBlurWipe {duration}s var(--ease-premium) forwards,
-                   blurIn {duration}s var(--ease-premium) forwards;
-      }}
-      @keyframes blurIn {{
-        0% {{ filter: blur(0px); }}
-        50% {{ filter: blur(24px); }}
-        100% {{ filter: blur(0px); opacity: 0; }}
-      }}
-    </style>
-  </div>"""
-    else:  # wipe
-        return f"""
-  <div class="transition-wipe" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
-    <style>
-      .transition-wipe {{
-        background: var(--maroon);
-        animation: motionBlurWipe {duration}s var(--ease-premium) forwards;
-      }}
-    </style>
+def scene_transition_html(kind: str = "wipe", duration: float = 0.6,
+                          start: float = 0.0, track: int = 99) -> str:
+    """Premium transition: motion-blur wipe."""
+    return f"""
+  <div class="scene transition" data-start="{start:.2f}" data-duration="{duration:.2f}" data-track-index="{track}">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: var(--maroon); z-index: 100;
+                animation: motionBlurWipe {duration}s {M['ease_premium']} forwards;"></div>
   </div>"""
 
 

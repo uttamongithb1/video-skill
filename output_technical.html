@@ -190,54 +190,19 @@
       <div style="font-size: 80px; font-weight: 950;
                   line-height: 1.0; letter-spacing: -0.02em;
                   text-align: center; margin-bottom: 32px;">
-        <span class="word-kinetic" style="--d:0.45s; --delay:0.0s; color:var(--cream);" animation-delay="0.0s">Ever</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.12s; color:var(--cream);" animation-delay="0.12s">wondered</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.24s; color:var(--cream);" animation-delay="0.24s">how</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.36s; color:var(--cream);" animation-delay="0.36s">Tor</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.48s; color:var(--cream);" animation-delay="0.48s">keeps</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.6s; color:var(--cream);" animation-delay="0.6s">you</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.72s; color:var(--cream);" animation-delay="0.72s">anonymous</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.84s; color:var(--cream);" animation-delay="0.84s">online?</span>
+        <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.0s; color:var(--cream); font-weight:750;">Ever</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.12s; color:var(--cream); font-weight:750;">wondered</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.24s; color:var(--cream); font-weight:750;">how</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.36s; color:var(--cream); font-weight:750;">Tor</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.48s; color:var(--cream); font-weight:750;">keeps</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.6s; color:var(--cream); font-weight:750;">you</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.72s; color:var(--cream); font-weight:750;">anonymous</span> <span style="display:inline-block; opacity:0; animation:popIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.84s; color:var(--cream); font-weight:750;">online?</span>
       </div>
-      <div style="font-size: 64px; opacity: 0; animation: popIn 0.6s var(--ease-premium) forwards 1.2s;">
+      <div style="font-size: 64px; opacity:0; animation:popIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 1.2s;">
         😩
       </div>
     </div>
   </div>
-  <div class="transition-wipe" data-start="3.31" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
+  <div class="scene transition" data-start="3.31" data-duration="0.60" data-track-index="99">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: var(--maroon); z-index: 100;
+                animation: motionBlurWipe 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;"></div>
   </div>
-  <div class="transition-wipe" data-start="3.91" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
-  </div>
-  <div class="transition-wipe" data-start="4.51" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
-  </div>
-  <div class="transition-wipe" data-start="5.11" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
-  </div>
-  <div class="transition-wipe" data-start="5.71" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
-  </div>
-  <div class="scene animation scene-ken-burns" data-start="3.31" data-duration="4.97" data-track-index="10">
+  <div class="scene animation" data-start="3.91" data-duration="4.97" data-track-index="10">
     <div class="animation-wrapper" style="width:100%;height:100%;display:flex;
         align-items:center;justify-content:center;background:var(--maroon);overflow:hidden;">
       <svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg"
@@ -263,79 +228,64 @@
         <text x="120" y="337" class="node-label">USER</text><text x="400" y="337" class="node-label">ISP</text><text x="680" y="337" class="node-label">ENTRY</text><text x="960" y="337" class="node-label">MIDDLE</text><text x="1160" y="337" class="node-label">EXIT</text>
         <text x="120" y="372" class="node-sub">You</text><text x="400" y="372" class="node-sub">ISP</text><text x="680" y="372" class="node-sub">Entry Relay</text><text x="960" y="372" class="node-sub">Middle Relay</text><text x="1160" y="372" class="node-sub">Exit Relay</text>
         <circle class="packet" cx="120" cy="330" r="14">
-          <animateMotion path="M 120,330 400,330 680,330 960,330 1160,330" dur="8s" repeatCount="indefinite" />
+          <animateMotion path="M 120,330 400,330 680,330 960,330 1160,330" dur="4.0s" repeatCount="indefinite" />
         </circle>
       </svg>
     </div>
-    <div class="glass-card" style="
+    
+    <div style="
         position: absolute; bottom: 110px; left: 100px; right: 100px;
+        background: rgba(255,255,255,0.65); backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.4); border-radius: 20px;
         color: var(--ink); padding: 24px 32px; max-width: 1080px;
         font-family: var(--font-display); font-size: 30px; font-weight: 800;
-        text-align: center; box-shadow: var(--shadow-hard);">
-      TOR — encrypted path through independent relays
-    </div>
-  </div>
-  <div class="scene evidence" data-start="3.31" data-duration="4.97" data-track-index="50">
-    <div class="glass-card" style="
-        position: absolute; bottom: 90px; left: 100px; right: 100px;
-        color: var(--ink); padding: 32px 40px; max-width: 1080px;
-        font-family: var(--font-display); box-shadow: var(--shadow-hard);">
-      <div style="font-size: 32px; font-weight: 700;
-                  line-height: 1.25; margin-bottom: 18px;
+        text-align: center; box-shadow: 0 20px 60px rgba(108,0,19,0.25);
+        animation: slideUp 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.3s; opacity: 0;">
+      <div style="font-size: 30px; font-weight: 800; margin-bottom: 12px;
                   border-left: 5px solid var(--maroon); padding-left: 16px;">
-        When you search for a website, your request does not go directly.
+        TOR — verified architecture
       </div>
-      <div style="height: 150px; background: var(--maroon-dark); border-radius: 16px;
-                  display: flex; align-items: center; justify-content: center;
-                  margin: 20px 0; color: var(--cream); font-size: 24px; font-weight: 700;
-                  opacity: 0.85;">
-        [PREMIUM MEDIA — insert YouTube here]
-        <div style="font-size:18px; margin-top:8px; opacity:0.6;">
-          data-var-src=""
-        </div>
-      </div>
+      <div style="font-size: 24px; font-weight: 600; margin-bottom: 10px;">EVIDENCE</div>
       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
-        <span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600; color:var(--maroon); background:var(--gold-soft); padding:6px 14px; border-radius:10px; margin-right:8px;">[YOUTUBE] Tor official animation</span><span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600; color:var(--maroon); background:var(--gold-soft); padding:6px 14px; border-radius:10px; margin-right:8px;">[WEBSITE] Tor project documentation</span>
+        <span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600; color:var(--maroon); background:rgba(255,215,0,0.15); padding:6px 14px; border-radius:10px; margin-right:8px;">[YOUTUBE] Tor official animation</span><span style="display:inline-block; margin-top:10px; font-size:20px; font-weight:600; color:var(--maroon); background:rgba(255,215,0,0.15); padding:6px 14px; border-radius:10px; margin-right:8px;">[WEBSITE] Tor project documentation</span>
       </div>
       <div style="margin-top: 14px; font-size: 20px; font-weight: 600; opacity: 0.7;
-                  border-top: 1px solid var(--glass-border); padding-top: 10px;">
-        Verified sources: YouTube, Website
+                  border-top: 1px solid rgba(255,255,255,0.4); padding-top: 10px;">
+        Sources: YouTube, Website
       </div>
     </div>
   </div>
-  <div class="scene body_left" data-start="8.28" data-duration="4.14" data-track-index="2">
+  <div class="scene body_left" data-start="8.88" data-duration="4.14" data-track-index="2">
     <div style="max-width: 960px; text-align: left;">
       <div style="font-size: 44px; font-weight: 750;
                   line-height: 1.35; letter-spacing: 0;">
-        <span class="word-slide-l" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">It</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">bounces</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">through</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.36s; color:var(--ink-soft); font-weight:750;" animation-delay="0.36s">multiple</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.48s; color:var(--ink-soft); font-weight:750;" animation-delay="0.48s">relays</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.6s; color:var(--ink-soft); font-weight:750;" animation-delay="0.6s">—</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.72s; color:var(--ink-soft); font-weight:750;" animation-delay="0.72s">entry,</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.84s; color:var(--ink-soft); font-weight:750;" animation-delay="0.84s">middle,</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.96s; color:var(--ink-soft); font-weight:750;" animation-delay="0.96s">and</span> <span class="word-slide-l" style="--d:0.7s; --delay:1.08s; color:var(--ink-soft); font-weight:750;" animation-delay="1.08s">exit.</span>
+        <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.0s; color:var(--ink-soft); font-weight:750;">It</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.12s; color:var(--ink-soft); font-weight:750;">bounces</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.24s; color:var(--ink-soft); font-weight:750;">through</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.36s; color:var(--ink-soft); font-weight:750;">multiple</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.48s; color:var(--ink-soft); font-weight:750;">relays</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.6s; color:var(--ink-soft); font-weight:750;">—</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.72s; color:var(--ink-soft); font-weight:750;">entry,</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.84s; color:var(--ink-soft); font-weight:750;">middle,</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.96s; color:var(--ink-soft); font-weight:750;">and</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 1.08s; color:var(--ink-soft); font-weight:750;">exit.</span>
       </div>
     </div>
   </div>
-  <div class="scene body_left" data-start="12.41" data-duration="3.72" data-track-index="2">
+  <div class="scene body_left" data-start="13.01" data-duration="3.72" data-track-index="2">
     <div style="max-width: 960px; text-align: left;">
       <div style="font-size: 44px; font-weight: 750;
                   line-height: 1.35; letter-spacing: 0;">
-        <span class="word-slide-l" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Each</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">relay</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">only</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.36s; color:var(--ink-soft); font-weight:750;" animation-delay="0.36s">knows</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.48s; color:var(--ink-soft); font-weight:750;" animation-delay="0.48s">the</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.6s; color:var(--ink-soft); font-weight:750;" animation-delay="0.6s">previous</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.72s; color:var(--ink-soft); font-weight:750;" animation-delay="0.72s">and</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.84s; color:var(--ink-soft); font-weight:750;" animation-delay="0.84s">next</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.96s; color:var(--ink-soft); font-weight:750;" animation-delay="0.96s">hop.</span>
+        <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.0s; color:var(--ink-soft); font-weight:750;">Each</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.12s; color:var(--ink-soft); font-weight:750;">relay</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.24s; color:var(--ink-soft); font-weight:750;">only</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.36s; color:var(--ink-soft); font-weight:750;">knows</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.48s; color:var(--ink-soft); font-weight:750;">the</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.6s; color:var(--ink-soft); font-weight:750;">previous</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.72s; color:var(--ink-soft); font-weight:750;">and</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.84s; color:var(--ink-soft); font-weight:750;">next</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.96s; color:var(--ink-soft); font-weight:750;">hop.</span>
       </div>
     </div>
   </div>
-  <div class="scene body_left" data-start="16.14" data-duration="3.31" data-track-index="2">
+  <div class="scene body_left" data-start="16.74" data-duration="3.31" data-track-index="2">
     <div style="max-width: 960px; text-align: left;">
       <div style="font-size: 44px; font-weight: 750;
                   line-height: 1.35; letter-spacing: 0;">
-        <span class="word-slide-l" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Tor</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">Project</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">documentation</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.36s; color:var(--ink-soft); font-weight:750;" animation-delay="0.36s">shows</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.48s; color:var(--ink-soft); font-weight:750;" animation-delay="0.48s">this</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.6s; color:var(--ink-soft); font-weight:750;" animation-delay="0.6s">onion</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.72s; color:var(--ink-soft); font-weight:750;" animation-delay="0.72s">routing</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.84s; color:var(--ink-soft); font-weight:750;" animation-delay="0.84s">architecture.</span>
+        <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.0s; color:var(--ink-soft); font-weight:750;">Tor</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.12s; color:var(--ink-soft); font-weight:750;">Project</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.24s; color:var(--ink-soft); font-weight:750;">documentation</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.36s; color:var(--ink-soft); font-weight:750;">shows</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.48s; color:var(--ink-soft); font-weight:750;">this</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.6s; color:var(--ink-soft); font-weight:750;">onion</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.72s; color:var(--ink-soft); font-weight:750;">routing</span> <span style="display:inline-block; opacity:0; animation:slideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.84s; color:var(--ink-soft); font-weight:750;">architecture.</span>
       </div>
     </div>
   </div>
-  <div class="transition-wipe" data-start="19.45" data-duration="0.60" data-track-index="99">
-    <style>
-      .transition-wipe {
-        background: var(--maroon);
-        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
-      }
-    </style>
+  <div class="scene transition" data-start="20.05" data-duration="0.60" data-track-index="99">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: var(--maroon); z-index: 100;
+                animation: motionBlurWipe 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;"></div>
   </div>
-  <div class="scene cta" data-start="19.45" data-duration="2.00" data-track-index="4">
+  <div class="scene cta" data-start="20.65" data-duration="2.00" data-track-index="4">
     <div class="text-safe">
       <div style="font-size: 56px; font-weight: 900;
                   line-height: 1.2; letter-spacing: -0.01em;
@@ -349,16 +299,15 @@
       </div>
     </div>
   </div>
-  <div class="scene end_screen" data-start="21.45" data-duration="5.00" data-track-index="90">
+  <div class="scene end_screen" data-start="22.65" data-duration="5.00" data-track-index="90">
     <div class="text-safe">
       <div style="font-size: 56px; font-weight: 900;
                   line-height: 1.2; letter-spacing: -0.01em;
-                  text-align: center; color: var(--cream); margin-bottom: 32px;
-                  animation: scaleReveal 0.8s var(--ease-premium) forwards;">
-        <span class="word-kinetic" style="--d:0.45s; --delay:0.0s; color:var(--cream);" animation-delay="0.0s">Subscribe</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.12s; color:var(--cream);" animation-delay="0.12s">for</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.24s; color:var(--cream);" animation-delay="0.24s">more</span>
+                  text-align: center; color: var(--cream); margin-bottom: 32px;">
+        <span style="display:inline-block; opacity:0; animation:scaleReveal 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.0s; color:var(--cream); font-weight:750;">Subscribe</span> <span style="display:inline-block; opacity:0; animation:scaleReveal 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.12s; color:var(--cream); font-weight:750;">for</span> <span style="display:inline-block; opacity:0; animation:scaleReveal 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.24s; color:var(--cream); font-weight:750;">more</span>
       </div>
       <div style="font-size: 28px; font-weight: 600; color: var(--gold);
-                  animation: popIn 0.6s var(--ease-premium) forwards 1s;">
+                  opacity:0; animation:popIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards 1s;">
         Subscribe for more
       </div>
     </div>
