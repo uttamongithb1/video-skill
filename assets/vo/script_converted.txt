@@ -1,9 +1,8 @@
-हर company में same resume भेज रहे हो?
-Resume को job के according customize करना भी ज़रूरी है।
-ये website try करो!
-आज है AI for College Students, और website है Rezi AI।
-बस अपना resume upload करो।
-Job description paste करो।
-और ये तुम्हारे resume को उस job के according tailor कर देगा।
-साथ ही ATS score भी check कर सकते हो।
-Link और मेरा resume tailoring prompt चाहिए तो comment करो — resume! मैं DM कर दूँगा। और ऐसे useful AI tools के लिये follow कर लेना!
+Bhai, kabhi socha hai Tor Browser tumhari identity hide kaise karta hai? Tum website open karte ho, lekin tumhari request seedha website tak nahi jaati!
+Instead, Tor apne network se teen computers select karta hai — Guard Node, Middle Node aur Exit Node. Aur in teeno se milkar banta hai tumhara secret route!
+Ab tumhari request encrypt hoti hai teen layers mein, bilkul ek ke andar ek rakhe teen envelopes ki tarah! Har computer sirf apni encryption layer remove karta hai aur request aage bhej deta hai.
+Guard ko tumhara real IP pata hota hai, lekin destination nahi. Middle ko sirf apne previous aur next computer ka pata hota hai. Aur Exit ko website ka address pata hota hai, lekin tumhara real IP nahi!
+Finally, Exit Node website se connect karta hai. Isliye website ko tumhara real IP nahi, Exit Node ka IP address dikhta hai. Aur response bhi isi route se wapas aata hai!
+Bas bhai! Isi technique ko kehte hain Onion Routing!
+Aise hi interesting tech aur cybersecurity videos ke liye follow kar lena, video ko like karna aur apne tech wale dost ke saath share bhi kar dena!
+Milte hain next video mein. Tab tak apna IP sambhal ke rakhna!

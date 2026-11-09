@@ -1,69 +1,62 @@
 {
-  "_read_me": "The script, one beat per section. `say` is what the voice reads (Hinglish in Devanagari for hi-IN prosody; English tech words in Latin). `on_screen` is the copy the design is built from. `caption` is what the .srt shows. `script_target` may be null: then the VO is measured and the picture is cut to it.",
-  "script_target": null,
+  "_read_me": "Tor Browser explainer script — Hinglish. One beat per section for the 9:16 reel.",
+  "script_target": 60,
   "sections": [
     {
       "id": "vo1",
       "label": "HOOK",
-      "say": "हर company में same resume भेज रहे हो?",
-      "on_screen": "HAR COMPANY MEIN SAME RESUME BHEJ RAHE HO?",
-      "caption": "Har company mein same resume bhej rahe ho?"
+      "say": "Bhai, kabhi socha hai Tor Browser tumhari identity hide kaise karta hai? Tum website open karte ho, lekin tumhari request seedha website tak nahi jaati!",
+      "on_screen": "TOR BROWSER IDENTITY HIDE KAISE KARTA HAI?",
+      "caption": "Bhai, kabhi socha hai Tor Browser tumhari identity hide kaise karta hai?"
     },
     {
       "id": "vo2",
-      "label": "PROBLEM",
-      "say": "Resume को job के according customize करना भी ज़रूरी है।",
-      "on_screen": "RESUME KO JOB KE ACCORDING CUSTOMIZE KARNA BHI ZAROORI HAI",
-      "caption": "Resume ko job ke according customize karna bhi zaroori hai."
+      "label": "ROUTE SELECTION",
+      "say": "Instead, Tor apne network se teen computers select karta hai — Guard Node, Middle Node aur Exit Node. Aur in teeno se milkar banta hai tumhara secret route!",
+      "on_screen": "TOR NETWORK SECRET ROUTE",
+      "caption": "Tor apne network se teen computers select karta hai."
     },
     {
       "id": "vo3",
-      "label": "TOOL",
-      "say": "ये website try करो!",
-      "on_screen": "YE WEBSITE TRY KARO",
-      "caption": "Ye website try karo."
+      "label": "ENCRYPTION",
+      "say": "Ab tumhari request encrypt hoti hai teen layers mein, bilkul ek ke andar ek rakhe teen envelopes ki tarah! Har computer sirf apni encryption layer remove karta hai aur request aage bhej deta hai.",
+      "on_screen": "THREE LAYER ENCRYPTION — ONION ROUTING",
+      "caption": "Request encrypt hoti hai teen layers mein."
     },
     {
       "id": "vo4",
-      "label": "INTRO",
-      "say": "आज है AI for College Students, और website है Rezi AI।",
-      "on_screen": "AI FOR COLLEGE STUDENTS — REZI AI",
-      "caption": "Aaj hai AI for College Students, aur website hai Rezi AI."
+      "label": "THREE NODES",
+      "say": "Guard ko tumhara real IP pata hota hai, lekin destination nahi. Middle ko sirf apne previous aur next computer ka pata hota hai. Aur Exit ko website ka address pata hota hai, lekin tumhara real IP nahi!",
+      "on_screen": "GUARD — MIDDLE — EXIT NODE",
+      "caption": "Guard ko real IP pata hai, lekin destination nahi."
     },
     {
       "id": "vo5",
-      "label": "UPLOAD",
-      "say": "बस अपना resume upload करो।",
-      "on_screen": "BAS APNA RESUME UPLOAD KARO",
-      "caption": "Bas apna resume upload karo."
+      "label": "WEBSITE CONNECTION",
+      "say": "Finally, Exit Node website se connect karta hai. Isliye website ko tumhara real IP nahi, Exit Node ka IP address dikhta hai. Aur response bhi isi route se wapas aata hai!",
+      "on_screen": "EXIT NODE CONNECTS TO WEBSITE",
+      "caption": "Website ko Exit Node ka IP dikhta hai."
     },
     {
       "id": "vo6",
-      "label": "JD",
-      "say": "Job description paste करो।",
-      "on_screen": "JOB DESCRIPTION PASTE KARO",
-      "caption": "Job description paste karo."
+      "label": "CTA PART 1",
+      "say": "Bas bhai! Isi technique ko kehte hain Onion Routing!",
+      "on_screen": "ONION ROUTING TECHNIQUE",
+      "caption": "Isi technique ko kehte hain Onion Routing!"
     },
     {
       "id": "vo7",
-      "label": "TAILOR",
-      "say": "और ये तुम्हारे resume को उस job के according tailor कर देगा।",
-      "on_screen": "RESUME US JOB KE ACCORDING TAILOR",
-      "caption": "Aur ye tumhare resume ko us job ke according tailor kar dega."
+      "label": "CTA PART 2",
+      "say": "Aise hi interesting tech aur cybersecurity videos ke liye follow kar lena, video ko like karna aur apne tech wale dost ke saath share bhi kar dena!",
+      "on_screen": "FOLLOW · LIKE · SHARE",
+      "caption": "Follow kar lena, video ko like karna aur share bhi kar dena!"
     },
     {
       "id": "vo8",
-      "label": "ATS",
-      "say": "साथ ही ATS score भी check कर सकते हो।",
-      "on_screen": "ATS SCORE BHI CHECK KAR SAKTE HO",
-      "caption": "Saath hi ATS score bhi check kar sakte ho."
-    },
-    {
-      "id": "vo9",
-      "label": "CTA",
-      "say": "Link और मेरा resume tailoring prompt चाहिए तो comment करो — resume! मैं DM कर दूँगा। और ऐसे useful AI tools के लिये follow कर लेना!",
-      "on_screen": "COMMENT KARO 'RESUME' · MAIN DM KAR DUNGA",
-      "caption": "Link aur mera resume tailoring prompt chahiye to comment karo resume. Main DM kar dunga, aur aise useful AI tools ke liye follow kar lena."
+      "label": "OUTRO",
+      "say": "Milte hain next video mein. Tab tak apna IP sambhal ke rakhna!",
+      "on_screen": "NEXT VIDEO MEIN MILTE HAIN!",
+      "caption": "Milte hain next video mein. Tab tak apna IP sambhal ke rakhna!"
     }
   ]
 }

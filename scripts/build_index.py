@@ -52,7 +52,22 @@ if "--even" in argv:
 elif tl_path.exists():
     tl = json.loads(tl_path.read_text())
     secs = tl["sections"]
-    if len(secs) != len(scenes):
+    if len(secs) < len(scenes):
+        # Extra scenes (e.g. end_screen) share the remaining time after last section
+        last_section_end = secs[-1]["end"]
+        remaining = tl["root_duration"] - last_section_end
+        extra_count = len(scenes) - len(secs)
+        extra_dur = remaining / extra_count if extra_count > 0 else 0
+        for i in range(extra_count):
+            secs.append({
+                "id": f"vo{len(secs) + i + 1}",
+                "label": "extra",
+                "start": round(last_section_end + i * extra_dur, 3),
+                "dur": round(extra_dur, 3),
+                "end": round(last_section_end + (i + 1) * extra_dur, 3),
+                "file": "",
+            })
+    elif len(secs) > len(scenes):
         die(f"{len(scenes)} scenes on disk but {len(secs)} sections in "
             f"timeline.json. Each scene must own exactly one VO section.")
     spans = [(s["start"], s["end"]) for s in secs]
