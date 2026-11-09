@@ -1,0 +1,106 @@
+{
+  "name": "resume-reject-video",
+  "version": "2.0.0",
+  "description": "Senior-agent orchestration skill: convert a voice script into a HyperFrames video with maroon/lavender styling, auto animation + evidence for technical topics, and media sourcing queries for YouTube/Instagram/forums/websites.",
+  "author": "Arena Agent",
+  "entrypoint": "generate.py",
+  "runtime": "python3",
+  "pipeline": [
+    "parse_script",
+    "detect_topic",
+    "decompose_scenes",
+    "insert_transitions",
+    "assemble_html",
+    "validate_design_contract"
+  ],
+  "inputs": {
+    "script": {
+      "type": "string",
+      "description": "Path to a .txt voice script. Supports plain lines (auto-timed ~150 wpm) or [start-end] Text timestamped segments. Use **word** for emphasis (right-aligned brand color).",
+      "required": true
+    },
+    "topic": {
+      "type": "string",
+      "description": "Force a topic (e.g. 'Tor', 'VPN', 'AI') to trigger animation + evidence. If omitted, auto-detected from script text.",
+      "required": false,
+      "default": null
+    },
+    "output": {
+      "type": "string",
+      "description": "Output HTML path.",
+      "default": "index.html",
+      "required": false
+    },
+    "wpm": {
+      "type": "integer",
+      "description": "Words per minute for auto-timing plain-text scripts.",
+      "default": 150,
+      "required": false
+    }
+  },
+  "outputs": {
+    "html": {
+      "type": "file",
+      "description": "HyperFrames index.html composition ready for npx hyperframes preview / render"
+    },
+    "report": {
+      "type": "object",
+      "description": "Build report with scene count, duration, animations, evidence, transitions, warnings, search queries"
+    }
+  },
+  "styling": {
+    "resolution": "1280x720",
+    "fps": 30,
+    "palette": {
+      "dark_bg": "#6C0013",
+      "dark_text": "#E8DBD1",
+      "light_bg": "#DAD1DD",
+      "light_text": "#141216",
+      "accent": "#FFD700",
+      "evidence_border": "#6C0013"
+    },
+    "typography": {
+      "title": "68px / weight 900",
+      "section": "56px / weight 800",
+      "body": "40px / weight 700",
+      "caption": "24px / weight 500",
+      "cta": "50px / weight 800"
+    },
+    "alignment": {
+      "title": "center, top band",
+      "body": "left",
+      "emphasis": "right (brand color, weight 900)",
+      "cta": "center, bottom",
+      "animation": "center, SVG diagram",
+      "evidence": "left, caption card"
+    },
+    "animation": {
+      "ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "fade_duration": "0.6s",
+      "slide_duration": "0.8s",
+      "packet_duration": "2.5s"
+    }
+  },
+  "technical_topics": [
+    "tor", "onion", "anonymous browsing", "dark web", "vpn", "proxy",
+    "isp", "relay", "network", "packet", "encryption", "cybersecurity",
+    "dns", "cdn", "blockchain", "bitcoin", "ai", "machine learning",
+    "how internet works"
+  ],
+  "media_platforms": ["youtube", "instagram", "forum", "website", "image"],
+  "scene_types": ["hook", "section", "body", "emphasis", "animation", "evidence", "cta", "transition"],
+  "commands": {
+    "generate": "python3 generate.py --script <script> [--topic <topic>] --output index.html",
+    "preview": "npx hyperframes preview",
+    "render": "npx hyperframes render"
+  },
+  "example_input": ["example_script.txt", "example_technical.txt"],
+  "example_output": ["output_simple.html", "output_technical.html"],
+  "agent_workflow": [
+    "1. Receive voice script + optional topic",
+    "2. Run generate.py",
+    "3. Read printed search queries for media sourcing",
+    "4. (Optional) Fill data-var-src URLs in evidence cards",
+    "5. Return index.html + npx hyperframes preview/render commands"
+  ]
+}

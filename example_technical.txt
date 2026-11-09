@@ -1,0 +1,6 @@
+Ever wondered how Tor keeps you anonymous online?
+When you search for a website, your request does not go directly.
+It bounces through multiple relays — entry, middle, and exit.
+Each relay only knows the previous and next hop.
+Tor Project documentation shows this onion routing architecture.
+Stay private. Stay secure.

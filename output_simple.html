@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+title>Technical Explainer — general</title>
+<style>
+:root {
+  --maroon_bg: rgb(108, 0, 19);
+  --maroon_near_black: rgb(26, 21, 21);
+  --cream_text: rgb(232, 219, 209);
+  --lavender_bg: rgb(218, 209, 221);
+  --ink_text: rgb(20, 18, 22);
+  --ink_soft: rgb(60, 50, 55);
+  --accent_gold: rgb(255, 215, 0);
+  --evidence_border: rgb(108, 0, 19);
+  --font_stack: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+#root {
+  width: 1280px; height: 720px;
+  position: relative; overflow: hidden;
+  font-family: var(--font_stack);
+  color: var(--cream_text); background: var(--maroon_bg);
+}
+
+.scene {
+  width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 0 90px;
+}
+
+.scene.hook .hook-title {
+  font-size: 68px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-align: center; color: var(--cream_text);
+  max-width: 1100px; margin-bottom: 36px;
+}
+.scene.hook .hook-emoji { font-size: 60px; }
+
+.scene.section .section-title,
+.scene.body .body-text {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.scene.emphasis .emph-text {
+  font-size: 40px;
+  font-weight: 900; color: var(--maroon_bg);
+  text-align: right;
+}
+
+.scene.cta .cta-text {
+  font-size: 50px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center; color: var(--cream_text);
+  max-width: 1100px;
+}
+
+.tor-diagram { width: 100%; height: 100%; display: block; }
+.packet-lane { width: 100%; height: 120px; }
+</style>
+</head>
+<body>
+
+<template id="root">
+  <!-- Orchestrator build — topic: general | technical: False -->
+  
+  <div class="scene hook" data-start="0.00" data-duration="2.80" data-track-index="1">
+    <div class="hook-title">Same resume everywhere?<br>That's why you're<br>rejected.
+       <span class="hook-emoji">😩</span></div>
+  </div>
+  <div class="scene body" data-start="2.80" data-duration="2.00" data-track-index="2">
+    <div class="body-text" style="text-align:left">Tailor it per company.</div>
+  </div>
+  <div class="scene emphasis" data-start="4.80" data-duration="2.00" data-track-index="2">
+    <div class="emph-text">Read the job description.</div>
+  </div>
+  <div class="scene emphasis" data-start="6.80" data-duration="2.00" data-track-index="2">
+    <div class="emph-text">Match their keywords.</div>
+  </div>
+  <div class="scene emphasis" data-start="8.80" data-duration="2.00" data-track-index="2">
+    <div class="emph-text">Highlight relevant projects.</div>
+  </div>
+  <div class="scene emphasis" data-start="10.80" data-duration="2.00" data-track-index="2">
+    <div class="emph-text">Use their language.</div>
+  </div>
+<div class="transition transition-fade" data-start="0" data-duration="0.6"
+     data-track-index="99">
+  <style>
+    .transition-fade {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--maroon_bg); z-index: 100;
+      animation: fadeOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes fadeOut { to { opacity: 0; } }
+  </style>
+</div>
+  <div class="scene cta" data-start="12.80" data-duration="4.40" data-track-index="3">
+    <div class="cta-text">One resume does not fit every<br>company. Customize and get<br>shortlisted.</div>
+  </div>
+</template>
+
+<script>
+  /* HyperFrames variables — agent fills media URLs here */
+  /* data-var-src attributes are in evidence cards above */
+</script>
+</body>
+</html>

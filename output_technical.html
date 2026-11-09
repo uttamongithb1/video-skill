@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+title>Technical Explainer — Tor</title>
+<style>
+:root {
+  --maroon_bg: rgb(108, 0, 19);
+  --maroon_near_black: rgb(26, 21, 21);
+  --cream_text: rgb(232, 219, 209);
+  --lavender_bg: rgb(218, 209, 221);
+  --ink_text: rgb(20, 18, 22);
+  --ink_soft: rgb(60, 50, 55);
+  --accent_gold: rgb(255, 215, 0);
+  --evidence_border: rgb(108, 0, 19);
+  --font_stack: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+#root {
+  width: 1280px; height: 720px;
+  position: relative; overflow: hidden;
+  font-family: var(--font_stack);
+  color: var(--cream_text); background: var(--maroon_bg);
+}
+
+.scene {
+  width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 0 90px;
+}
+
+.scene.hook .hook-title {
+  font-size: 68px;
+  font-weight: 900;
+  line-height: 1.05;
+  text-align: center; color: var(--cream_text);
+  max-width: 1100px; margin-bottom: 36px;
+}
+.scene.hook .hook-emoji { font-size: 60px; }
+
+.scene.section .section-title,
+.scene.body .body-text {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.scene.emphasis .emph-text {
+  font-size: 40px;
+  font-weight: 900; color: var(--maroon_bg);
+  text-align: right;
+}
+
+.scene.cta .cta-text {
+  font-size: 50px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center; color: var(--cream_text);
+  max-width: 1100px;
+}
+
+.tor-diagram { width: 100%; height: 100%; display: block; }
+.packet-lane { width: 100%; height: 120px; }
+</style>
+</head>
+<body>
+
+<template id="root">
+  <!-- Orchestrator build — topic: Tor | technical: True -->
+  
+  <div class="scene hook" data-start="0.00" data-duration="3.20" data-track-index="1">
+    <div class="hook-title">Ever wondered how Tor<br>keeps you anonymous<br>online?
+       <span class="hook-emoji">😩</span></div>
+  </div>
+<div class="transition transition-fade" data-start="0" data-duration="0.6"
+     data-track-index="99">
+  <style>
+    .transition-fade {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--maroon_bg); z-index: 100;
+      animation: fadeOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes fadeOut { to { opacity: 0; } }
+  </style>
+</div>
+  <div class="scene animation" data-start="3.20" data-duration="4.80" data-track-index="10">
+    <div class="animation-wrapper" style="width:100%;height:100%;display:flex;
+        align-items:center;justify-content:center;background:var(--maroon_bg);">
+      <svg width="1280" height="720" viewBox="0 0 1280 720"
+     xmlns="http://www.w3.org/2000/svg" class="tor-diagram">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon fill="var(--cream_text)" points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <style>
+      .node-circle { fill: var(--maroon_bg); stroke: var(--cream_text); stroke-width: 3; }
+      .node-label { fill: var(--cream_text); font-family: var(--font_stack);
+                     font-weight: 900; font-size: 20px; text-anchor: middle; }
+      .line { stroke: var(--cream_text); stroke-width: 3; fill: none; }
+      .packet { fill: var(--accent_gold); stroke: var(--maroon_bg); stroke-width: 2; }
+      .path-line { stroke: var(--ink_soft); stroke-width: 2;
+                    stroke-dasharray: 8 4; opacity: 0.6; }
+      @keyframes movePacket {
+        0%   { offset-distance: 0%; }
+        100% { offset-distance: 100%; }
+      }
+      #packet {
+        animation: movePacket 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+      }
+    </style>
+  </defs>
+
+  <!-- Connection path -->
+  <polyline points="100,360 380,360 660,360 940,360 1180,360" class="path-line" />
+
+  <!-- Nodes -->
+  <circle cx="100" cy="360" r="42" class="node-circle" /><circle cx="380" cy="360" r="42" class="node-circle" /><circle cx="660" cy="360" r="42" class="node-circle" /><circle cx="940" cy="360" r="42" class="node-circle" /><circle cx="1180" cy="360" r="42" class="node-circle" />
+  <text x="100" y="367" class="node-label">USER</text><text x="380" y="367" class="node-label">ISP</text><text x="660" y="367" class="node-label">ENTRY</text><text x="940" y="367" class="node-label">MIDDLE</text><text x="1180" y="367" class="node-label">EXIT</text>
+  <text x="100" y="400" class="node-label" style="font-size:16px; font-weight:600; opacity:0.85">You</text><text x="380" y="400" class="node-label" style="font-size:16px; font-weight:600; opacity:0.85">ISP</text><text x="660" y="400" class="node-label" style="font-size:16px; font-weight:600; opacity:0.85">Entry Relay</text><text x="940" y="400" class="node-label" style="font-size:16px; font-weight:600; opacity:0.85">Middle Relay</text><text x="1180" y="400" class="node-label" style="font-size:16px; font-weight:600; opacity:0.85">Exit Relay</text>
+
+  <!-- Animated packet -->
+  <circle id="packet" cx="100" cy="360" r="14" class="packet">
+    <animateMotion path="M 100,360 380,360 660,360 940,360 1180,360"
+                   dur="2.5s" repeatCount="indefinite" />
+  </circle>
+</svg>
+    </div>
+    
+    <div class="evidence-overlay" style="
+        position: absolute; bottom: 40px; left: 90px; right: 90px;
+        background: rgba(218, 209, 221, 0.95); color: var(--ink_text);
+        border-left: 6px solid var(--evidence_border);
+        padding: 20px 28px; font-family: var(--font_stack);
+        font-size: 24px; line-height: 1.4; border-radius: 0 12px 12px 0;
+        backdrop-filter: blur(6px);">
+      <div style="font-size: 28px; font-weight: 800; margin-bottom: 12px;
+                  color: var(--maroon_bg);">
+        EVIDENCE
+      </div>
+      <div style="font-size: 24px; font-weight: 700; margin-bottom: 10px;">
+        TOR architecture verified
+      </div>
+      <div style="margin-top:8px; font-size:20px; color: var(--ink_soft); font-weight:500;"><span style="color:var(--maroon_bg);font-weight:700;">[YOUTUBE]</span> Tor official animation</div><div style="margin-top:8px; font-size:20px; color: var(--ink_soft); font-weight:500;"><span style="color:var(--maroon_bg);font-weight:700;">[WEBSITE]</span> Tor project documentation</div>
+      <div style="margin-top: 12px; font-size: 20px; font-weight: 500;
+                  opacity: 0.7; border-top: 1px solid var(--evidence_border);
+                  padding-top: 10px;">
+        Sources: YouTube, Website
+      </div>
+    </div>
+    <div class="anim-caption" style="
+        position:absolute; bottom:120px; left:90px; right:90px;
+        color: var(--cream_text); font-family: var(--font_stack);
+        font-size: 32px; font-weight: 700; text-align: center;
+        background: rgba(26,21,21,0.6); padding: 16px 24px;
+        border-radius: 12px; backdrop-filter: blur(4px);">
+      TOR — request path through relays
+    </div>
+  </div>
+  <div class="scene body" data-start="8.00" data-duration="4.00" data-track-index="2">
+    <div class="body-text" style="text-align:left">It bounces through multiple relays — entry, middle, and exit.</div>
+  </div>
+  <div class="scene body" data-start="12.00" data-duration="3.60" data-track-index="2">
+    <div class="body-text" style="text-align:left">Each relay only knows the previous and next hop.</div>
+  </div>
+  <div class="scene body" data-start="15.60" data-duration="3.20" data-track-index="2">
+    <div class="body-text" style="text-align:left">Tor Project documentation shows this onion routing architecture.</div>
+  </div>
+<div class="transition transition-fade" data-start="0" data-duration="0.6"
+     data-track-index="99">
+  <style>
+    .transition-fade {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--maroon_bg); z-index: 100;
+      animation: fadeOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes fadeOut { to { opacity: 0; } }
+  </style>
+</div>
+  <div class="scene cta" data-start="18.80" data-duration="2.00" data-track-index="3">
+    <div class="cta-text">Stay private. Stay secure.</div>
+  </div>
+</template>
+
+<script>
+  /* HyperFrames variables — agent fills media URLs here */
+  /* data-var-src attributes are in evidence cards above */
+</script>
+</body>
+</html>
