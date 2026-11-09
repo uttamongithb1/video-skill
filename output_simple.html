@@ -3,112 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-title>Technical Explainer — general</title>
+<title>Premium Explainer — general</title>
 <style>
 :root {
-  --maroon_bg: rgb(108, 0, 19);
-  --maroon_near_black: rgb(26, 21, 21);
-  --cream_text: rgb(232, 219, 209);
-  --lavender_bg: rgb(218, 209, 221);
-  --ink_text: rgb(20, 18, 22);
-  --ink_soft: rgb(60, 50, 55);
-  --accent_gold: rgb(255, 215, 0);
-  --evidence_border: rgb(108, 0, 19);
-  --font_stack: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  /* Colors */
+  --maroon: rgb(108, 0, 19);
+  --maroon-dark: rgb(60, 0, 12);
+  --cream: rgb(255, 248, 240);
+  --lavender: rgb(235, 230, 240);
+  --ink: rgb(15, 12, 20);
+  --ink-soft: rgb(80, 70, 90);
+  --gold: rgb(255, 215, 0);
+  --gold-soft: rgba(255, 215, 0, 0.15);
+  --cyan: rgb(90, 200, 255);
+  --cyan-soft: rgba(90, 200, 255, 0.1);
+  --emerald: rgb(60, 200, 140);
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-dark: rgba(108, 0, 19, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --shadow-soft: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-hard: 0 20px 60px rgba(108, 0, 19, 0.25);
+
+  /* Motion */
+  --ease-premium: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  --ease-snap: cubic-bezier(0.4, 0, 1, 1);
+  --fade-in: 0.5s;
+  --slide-in: 0.7s;
+  --pop-in: 0.45s;
+  --ken-burns: 8s;
+  --transition-wipe: 0.5s;
+  --transition-blur: 0.6s;
+  --stagger: 0.12s;
+
+  /* Typography */
+  --font-stack: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Inter var', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+
+  /* Layout */
+  --canvas-w: 1280px;
+  --canvas-h: 720px;
+  --page-padding: 100px;
+  --safe-x: 160px;
+  --safe-y: 140px;
+  --max-text-width: 960px;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {{ margin: 0; padding: 0; box-sizing: border-box; }}
 
-#root {
-  width: 1280px; height: 720px;
-  position: relative; overflow: hidden;
-  font-family: var(--font_stack);
-  color: var(--cream_text); background: var(--maroon_bg);
-}
+#root {{
+  width: var(--canvas-w);
+  height: var(--canvas-h);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-display);
+  color: var(--cream);
+  background: var(--maroon);
+}}
 
-.scene {
+/* Safe zone guide (not rendered, just for reference in preview) */
+.safe-zone {{
+  position: absolute;
+  top: var(--safe-y); left: var(--safe-x);
+  right: var(--safe-x); bottom: var(--safe-y);
+  border: 2px dashed rgba(255,255,255,0.15);
+  pointer-events: none;
+  z-index: 0;
+}}
+
+.scene {{
   width: 100%; height: 100%; position: absolute; top: 0; left: 0;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 0 90px;
-}
+  align-items: center; justify-content: center;
+  padding: var(--page-padding);
+  z-index: 1;
+}}
 
-.scene.hook .hook-title {
-  font-size: 68px;
-  font-weight: 900;
-  line-height: 1.05;
-  text-align: center; color: var(--cream_text);
-  max-width: 1100px; margin-bottom: 36px;
-}
-.scene.hook .hook-emoji { font-size: 60px; }
+.text-safe {{
+  max-width: var(--max-text-width);
+  text-align: center;
+}}
 
-.scene.section .section-title,
-.scene.body .body-text {
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1.35;
-}
+/* Premium utility classes */
+.glass-card {{
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+}}
 
-.scene.emphasis .emph-text {
-  font-size: 40px;
-  font-weight: 900; color: var(--maroon_bg);
-  text-align: right;
-}
+.glass-dark-card {{
+  background: var(--glass-dark);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-hard);
+}}
 
-.scene.cta .cta-text {
-  font-size: 50px;
-  font-weight: 800;
-  line-height: 1.25;
-  text-align: center; color: var(--cream_text);
-  max-width: 1100px;
-}
+.gradient-text {{
+  background: linear-gradient(135deg, var(--cream) 0%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}}
 
-.tor-diagram { width: 100%; height: 100%; display: block; }
-.packet-lane { width: 100%; height: 120px; }
+.gold-accent {{
+  color: var(--gold);
+}}
+
+/* Kinetic typography animations */
+@keyframes popIn {{
+  0% {{ opacity: 0; transform: scale(0.6) rotate(-2deg); }}
+  60% {{ transform: scale(1.1) rotate(1deg); }}
+  100% {{ opacity: 1; transform: scale(1) rotate(0); }}
+}}
+
+@keyframes slideInLeft {{
+  0% {{ opacity: 0; transform: translateX(-40px); }}
+  100% {{ opacity: 1; transform: translateX(0); }}
+}}
+
+@keyframes slideInRight {{
+  0% {{ opacity: 0; transform: translateX(40px); }}
+  100% {{ opacity: 1; transform: translateX(0); }}
+}}
+
+@keyframes scaleReveal {{
+  0% {{ opacity: 0; transform: scale(0.85); }}
+  100% {{ opacity: 1; transform: scale(1); }}
+}}
+
+@keyframes slideUp {{
+  0% {{ opacity: 0; transform: translateY(30px); }}
+  100% {{ opacity: 1; transform: translateY(0); }}
+}}
+
+@keyframes kenBurns {{
+  0% {{ transform: scale(1) translate(0, 0); }}
+  100% {{ transform: scale(1.12) translate(20px, -10px); }}
+}}
+
+@keyframes motionBlurWipe {{
+  0% {{ clip-path: inset(0 100% 0 0); }}
+  100% {{ clip-path: inset(0 0 0 0); }}
+}}
+
+.word-kinetic {{
+  display: inline-block;
+  opacity: 0;
+  animation: popIn var(--pop-in) var(--ease-premium) forwards;
+}}
+
+.word-slide-l {{
+  display: inline-block;
+  opacity: 0;
+  animation: slideInLeft var(--slide-in) var(--ease-premium) forwards;
+}}
+
+.word-slide-r {{
+  display: inline-block;
+  opacity: 0;
+  animation: slideInRight var(--slide-in) var(--ease-premium) forwards;
+}}
+
+.scene-ken-burns {{
+  animation: kenBurns var(--ken-burns) var(--ease-premium) alternate infinite;
+}}
+
+.transition-wipe {{
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 100;
+  animation: motionBlurWipe var(--transition-wipe) var(--ease-premium) forwards;
+}}
 </style>
 </head>
 <body>
 
 <template id="root">
-  <!-- Orchestrator build — topic: general | technical: False -->
+  <!-- Premium Orchestrator v3.0 — topic: general | technical: False -->
   
-  <div class="scene hook" data-start="0.00" data-duration="2.80" data-track-index="1">
-    <div class="hook-title">Same resume everywhere?<br>That's why you're<br>rejected.
-       <span class="hook-emoji">😩</span></div>
+  <div class="scene hook" data-start="0.00" data-duration="2.90" data-track-index="1">
+    <div class="text-safe">
+      <div style="font-size: 80px; font-weight: 950;
+                  line-height: 1.0; letter-spacing: -0.02em;
+                  text-align: center; margin-bottom: 32px;">
+        <span class="word-kinetic" style="--d:0.45s; --delay:0.0s; color:var(--cream);" animation-delay="0.0s">Same</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.12s; color:var(--cream);" animation-delay="0.12s">resume</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.24s; color:var(--cream);" animation-delay="0.24s">everywhere?</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.36s; color:var(--cream);" animation-delay="0.36s">That's</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.48s; color:var(--cream);" animation-delay="0.48s">why</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.6s; color:var(--cream);" animation-delay="0.6s">you're</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.72s; color:var(--cream);" animation-delay="0.72s">rejected.</span>
+      </div>
+      <div style="font-size: 64px; opacity: 0; animation: popIn 0.6s var(--ease-premium) forwards 1.2s;">
+        😩
+      </div>
+    </div>
   </div>
-  <div class="scene body" data-start="2.80" data-duration="2.00" data-track-index="2">
-    <div class="body-text" style="text-align:left">Tailor it per company.</div>
+  <div class="scene body_left" data-start="2.90" data-duration="2.00" data-track-index="2">
+    <div style="max-width: 960px; text-align: left;">
+      <div style="font-size: 44px; font-weight: 750;
+                  line-height: 1.35; letter-spacing: 0;">
+        <span class="word-slide-l" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Tailor</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">it</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">per</span> <span class="word-slide-l" style="--d:0.7s; --delay:0.36s; color:var(--ink-soft); font-weight:750;" animation-delay="0.36s">company.</span>
+      </div>
+    </div>
   </div>
-  <div class="scene emphasis" data-start="4.80" data-duration="2.00" data-track-index="2">
-    <div class="emph-text">Read the job description.</div>
+  <div class="scene body_right" data-start="4.90" data-duration="2.00" data-track-index="3">
+    <div style="max-width: 960px; text-align: right;">
+      <div style="font-size: 44px; font-weight: 750;
+                  line-height: 1.35; letter-spacing: 0;">
+        <span class="word-slide-r" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Read</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">the</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">job</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.36s; color:var(--ink-soft); font-weight:750;" animation-delay="0.36s">description.</span>
+      </div>
+    </div>
   </div>
-  <div class="scene emphasis" data-start="6.80" data-duration="2.00" data-track-index="2">
-    <div class="emph-text">Match their keywords.</div>
+  <div class="scene body_right" data-start="6.90" data-duration="2.00" data-track-index="3">
+    <div style="max-width: 960px; text-align: right;">
+      <div style="font-size: 44px; font-weight: 750;
+                  line-height: 1.35; letter-spacing: 0;">
+        <span class="word-slide-r" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Match</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">their</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.24s; color:var(--maroon); font-weight:950;" animation-delay="0.24s">keywords.</span>
+      </div>
+    </div>
   </div>
-  <div class="scene emphasis" data-start="8.80" data-duration="2.00" data-track-index="2">
-    <div class="emph-text">Highlight relevant projects.</div>
+  <div class="scene body_right" data-start="8.90" data-duration="2.00" data-track-index="3">
+    <div style="max-width: 960px; text-align: right;">
+      <div style="font-size: 44px; font-weight: 750;
+                  line-height: 1.35; letter-spacing: 0;">
+        <span class="word-slide-r" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Highlight</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">relevant</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">projects.</span>
+      </div>
+    </div>
   </div>
-  <div class="scene emphasis" data-start="10.80" data-duration="2.00" data-track-index="2">
-    <div class="emph-text">Use their language.</div>
+  <div class="scene body_right" data-start="10.90" data-duration="2.00" data-track-index="3">
+    <div style="max-width: 960px; text-align: right;">
+      <div style="font-size: 44px; font-weight: 750;
+                  line-height: 1.35; letter-spacing: 0;">
+        <span class="word-slide-r" style="--d:0.7s; --delay:0.0s; color:var(--ink-soft); font-weight:750;" animation-delay="0.0s">Use</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.12s; color:var(--ink-soft); font-weight:750;" animation-delay="0.12s">their</span> <span class="word-slide-r" style="--d:0.7s; --delay:0.24s; color:var(--ink-soft); font-weight:750;" animation-delay="0.24s">language.</span>
+      </div>
+    </div>
   </div>
-<div class="transition transition-fade" data-start="0" data-duration="0.6"
-     data-track-index="99">
-  <style>
-    .transition-fade {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--maroon_bg); z-index: 100;
-      animation: fadeOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    @keyframes fadeOut { to { opacity: 0; } }
-  </style>
-</div>
-  <div class="scene cta" data-start="12.80" data-duration="4.40" data-track-index="3">
-    <div class="cta-text">One resume does not fit every<br>company. Customize and get<br>shortlisted.</div>
+  <div class="transition-wipe" data-start="12.90" data-duration="0.60" data-track-index="99">
+    <style>
+      .transition-wipe {
+        background: var(--maroon);
+        animation: motionBlurWipe 0.6s var(--ease-premium) forwards;
+      }
+    </style>
+  </div>
+  <div class="scene cta" data-start="12.90" data-duration="4.55" data-track-index="4">
+    <div class="text-safe">
+      <div style="font-size: 56px; font-weight: 900;
+                  line-height: 1.2; letter-spacing: -0.01em;
+                  text-align: center; color: var(--cream); margin-bottom: 24px;
+                  animation: scaleReveal 0.8s var(--ease-premium) forwards;">
+        One resume does not fit every company. Customize and get shortlisted.
+      </div>
+      <div style="font-size: 28px; font-weight: 600; color: var(--gold);
+                  animation: popIn 0.6s var(--ease-premium) forwards 1s;">
+        Tap the link in bio
+      </div>
+    </div>
+  </div>
+  <div class="scene end_screen" data-start="17.45" data-duration="5.00" data-track-index="90">
+    <div class="text-safe">
+      <div style="font-size: 56px; font-weight: 900;
+                  line-height: 1.2; letter-spacing: -0.01em;
+                  text-align: center; color: var(--cream); margin-bottom: 32px;
+                  animation: scaleReveal 0.8s var(--ease-premium) forwards;">
+        <span class="word-kinetic" style="--d:0.45s; --delay:0.0s; color:var(--cream);" animation-delay="0.0s">Subscribe</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.12s; color:var(--cream);" animation-delay="0.12s">for</span> <span class="word-kinetic" style="--d:0.45s; --delay:0.24s; color:var(--cream);" animation-delay="0.24s">more</span>
+      </div>
+      <div style="font-size: 28px; font-weight: 600; color: var(--gold);
+                  animation: popIn 0.6s var(--ease-premium) forwards 1s;">
+        Subscribe for more
+      </div>
+    </div>
   </div>
 </template>
 
+
+
 <script>
-  /* HyperFrames variables — agent fills media URLs here */
+  /* HyperFrames variables — fill media URLs here */
   /* data-var-src attributes are in evidence cards above */
+  /* Audio: voiceover="" music="" */
 </script>
 </body>
 </html>

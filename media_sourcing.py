@@ -1,45 +1,48 @@
 """
-Media Sourcing — Evidence & Internet Media Discovery Interface.
+Premium Media Sourcing — v3.0
+==============================
 
-Helps the agent find and cite high-quality evidence for technical explainers:
-  • Search query templates per platform (YouTube, Instagram, forums, websites)
-  • Evidence card HTML blocks with citation placeholders
-  • Media URL placeholders (data-var-src) for HyperFrames variable injection
-  • Consistency rules for evidence citation format
+Production-ready media pipeline for evidence and B-roll:
+  • Per-platform search query templates (YouTube, Instagram, forums, websites, images)
+  • yt-dlp download commands for video/audio
+  • Image download placeholders
+  • Evidence card HTML structure with citation
+  • Fair-use / rights verification reminders
 
-The agent is responsible for executing searches and filling in real URLs.
-This module generates the *structure* and *search strategy*.
+The agent executes searches and downloads; this module generates the strategy
+and the exact shell commands.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 
 @dataclass
 class MediaSource:
-    platform: str          # youtube | instagram | forum | website | image
+    platform: str          # youtube | instagram | forum | website | image | music
     query: str
-    url: str = ""          # filled by agent after search
+    url: str = ""
     caption: str = ""
-    license_note: str = "Verify rights before use"
+    license_note: str = "Verify rights / fair use before publishing"
+    download_cmd: str = ""
 
 
 @dataclass
 class EvidenceBlock:
-    timestamp: str         # e.g. "12-18s"
-    claim: str             # what the evidence supports
+    timestamp: str
+    claim: str
     sources: List[MediaSource]
     html_block: str = ""
 
 
-# ─── Search query templates per topic category ───────────────────────────
-SEARCH_TEMPLATES = {
+# ─── Premium search query templates ──────────────────────────────────────
+SEARCH_TEMPLATES: Dict[str, Dict[str, List[str]]] = {
     "tor": {
         "youtube": [
             "Tor network how it works entry middle exit relay animation",
-            "Tor browser anonymous routing explained visual",
+            "Tor Browser anonymous routing explained visual",
             "Tor Project official architecture diagram",
         ],
         "instagram": [
@@ -57,6 +60,31 @@ SEARCH_TEMPLATES = {
         "image": [
             "Tor network diagram entry middle exit relay",
             "Tor circuit animation GIF",
+        ],
+    },
+    "vpn": {
+        "youtube": [
+            "How VPN works encryption tunnel explained animation",
+            "VPN vs proxy vs Tor difference visual",
+        ],
+        "website": [
+            "https://www.eff.org/deeplinks VPN explained",
+        ],
+        "image": [
+            "VPN tunnel encryption diagram",
+        ],
+    },
+    "ai": {
+        "youtube": [
+            "How large language models work animation",
+            "Neural network explained visual",
+        ],
+        "website": [
+            "https://openai.com/ AI overview",
+        ],
+        "image": [
+            "Neural network architecture diagram",
+            "Transformer model attention diagram",
         ],
     },
     "generic_technical": {
@@ -84,88 +112,58 @@ SEARCH_TEMPLATES = {
 
 
 def build_search_queries(topic: str, category: str = "generic_technical") -> dict:
-    """
-    Return a dict of platform -> list of search queries for the given topic.
-    The agent should run these searches and collect high-quality media URLs.
-    """
+    """Return platform → list of search queries. Agent executes these."""
     templates = SEARCH_TEMPLATES.get(category, SEARCH_TEMPLATES["generic_technical"])
-    queries = {}
-    for platform, template_list in templates.items():
-        queries[platform] = [t.format(topic=topic) for t in template_list]
-    return queries
+    return {
+        platform: [t.format(topic=topic) for t in template_list]
+        for platform, template_list in templates.items()
+    }
 
 
-def evidence_card_html(timestamp: str, claim: str, sources: list,
-                       design: dict) -> str:
+def yt_dlp_command(query: str, output_dir: str = "assets/media") -> str:
+    """Generate a yt-dlp command to download the best quality video."""
+    return (
+        f'yt-dlp -f "bestvideo[height<=1080]+bestaudio/best" '
+        f'--merge-output-format mp4 --write-thumbnail --write-sub --sub-lang en '
+        f'"ytsearch1:{query}" -o "{output_dir}/%(title)s.%(ext)s"'
+    )
+
+
+def audio_download_command(query: str, output_dir: str = "assets/audio") -> str:
+    """Generate a yt-dlp command to download audio only (voiceover/music)."""
+    return (
+        f'yt-dlp -x --audio-format mp3 --audio-quality 0 '
+        f'"ytsearch1:{query}" -o "{output_dir}/%(title)s.%(ext)s"'
+    )
+
+
+def evidence_card_structure(
+    timestamp: str,
+    claim: str,
+    sources: List[dict],
+) -> dict:
     """
-    Generate a HyperFrames-compatible evidence card block.
-    sources: list of MediaSource dicts with platform, url, caption.
+    Return a structured evidence block dict for the orchestrator.
+    Includes the HTML block placeholder and download commands.
     """
-    bg = design.get("evidence_bg", "var(--lavender_bg)")
-    text = design.get("evidence_text", "var(--ink)")
-    border = design.get("evidence_border", "var(--evidence_border)")
-
-    source_html = ""
+    dl_cmds = []
     for s in sources:
-        source_html += f"""
-    <div class="evidence-source" style="margin-top:12px; font-size:20px;
-         color: var(--ink_soft); font-weight:500;">
-      <span style="color: var(--maroon_bg); font-weight:700;">[{s['platform'].upper()}]</span>
-      {s.get('caption', s.get('url', 'source'))}
-    </div>"""
+        if s.get("platform") == "youtube" and s.get("query"):
+            dl_cmds.append(yt_dlp_command(s["query"]))
+        elif s.get("platform") == "image" and s.get("query"):
+            dl_cmds.append(f'# Image download: {s["query"]}')
 
-    return f"""
-  <div class="scene evidence" data-start="{timestamp.split('-')[0]}"
-       data-duration="{_dur(timestamp)}" data-track-index="50">
-    <div class="evidence-card" style="
-        background: {bg}; color: {text}; border-left: 6px solid {border};
-        padding: {design.get('card_padding','40px')}; max-width: 1100px;
-        font-family: var(--font_stack);">
-      <div class="evidence-claim" style="
-          font-size: 40px; font-weight: 700; line-height: 1.35;
-          margin-bottom: 24px;">{claim}</div>
-      <div class="evidence-media" style="
-          margin-bottom: 20px; min-height: 200px;
-          background: var(--maroon_near_black);
-          display: flex; align-items: center; justify-content: center;
-          color: var(--cream_text); font-size: 28px; font-weight: 600;">
-        [MEDIA PLACEHOLDER — insert {sources[0]['platform'] if sources else 'image/video'} here]
-        <div style="font-size:20px; margin-top:10px; opacity:0.7;">
-          data-var-src="{sources[0]['url'] if sources else ''}"
-        </div>
-      </div>
-      {source_html}
-      <div class="evidence-cite" style="
-          margin-top: 20px; font-size: 20px; font-weight: 500;
-          opacity: 0.7; border-top: 1px solid {border}; padding-top: 12px;">
-        Sources: {', '.join(s['platform'] for s in sources)}
-      </div>
-    </div>
-  </div>"""
+    return {
+        "timestamp": timestamp,
+        "claim": claim,
+        "sources": sources,
+        "download_commands": dl_cmds,
+        "rights_note": "All media must be rights-cleared or fair-use verified before publishing.",
+    }
 
 
-def _dur(timestamp: str) -> float:
-    """Parse '12-18s' -> 6.0 duration."""
-    try:
-        parts = timestamp.replace("s", "").split("-")
-        return float(parts[1]) - float(parts[0])
-    except Exception:
-        return 4.0
-
-
-def citation_footer(sources: list, design: dict) -> str:
-    """Lower-third citation strip for evidence scenes."""
-    text = design.get("evidence_text", "var(--ink)")
-    return f"""
-  <div class="citation-strip" style="
-      position: absolute; bottom: 40px; left: 90px; right: 90px;
-      background: rgba(26, 21, 21, 0.85); color: {text};
-      padding: 14px 24px; font-family: var(--font_stack);
-      font-size: 20px; font-weight: 500; border-radius: 8px;
-      backdrop-filter: blur(4px);">
-    Sources: {' • '.join(s.get('platform','') for s in sources)}
-  </div>"""
-
-
-__all__ = ["MediaSource", "EvidenceBlock", "build_search_queries",
-           "evidence_card_html", "citation_footer"]
+__all__ = [
+    "MediaSource", "EvidenceBlock", "build_search_queries",
+    "yt_dlp_command", "audio_download_command", "evidence_card_structure",
+    "SEARCH_TEMPLATES",
+]
