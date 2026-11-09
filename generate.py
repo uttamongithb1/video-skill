@@ -81,6 +81,16 @@ def main() -> None:
         print(f"ERROR: Script not found: {script_path}", file=sys.stderr)
         sys.exit(1)
 
+    # If JSON script (sections.json), convert to plain text for parsing
+    if script_path.suffix == ".json":
+        import json as _json
+        spec = _json.loads(script_path.read_text())
+        lines = [s.get("say", s.get("on_screen", "")) for s in spec.get("sections", [])]
+        tmp_script = script_path.parent / "script_converted.txt"
+        tmp_script.write_text("\n".join(lines))
+        args.script = str(tmp_script)
+        script_path = tmp_script
+
     orch = PremiumOrchestrator(wpm=args.wpm)
     html_path, report = orch.build(
         str(script_path),

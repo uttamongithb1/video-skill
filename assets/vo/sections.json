@@ -1,0 +1,69 @@
+{
+  "_read_me": "The script, one beat per section. `say` is what the voice reads (Hinglish in Devanagari for hi-IN prosody; English tech words in Latin). `on_screen` is the copy the design is built from. `caption` is what the .srt shows. `script_target` may be null: then the VO is measured and the picture is cut to it.",
+  "script_target": null,
+  "sections": [
+    {
+      "id": "vo1",
+      "label": "HOOK",
+      "say": "हर company में same resume भेज रहे हो?",
+      "on_screen": "HAR COMPANY MEIN SAME RESUME BHEJ RAHE HO?",
+      "caption": "Har company mein same resume bhej rahe ho?"
+    },
+    {
+      "id": "vo2",
+      "label": "PROBLEM",
+      "say": "Resume को job के according customize करना भी ज़रूरी है।",
+      "on_screen": "RESUME KO JOB KE ACCORDING CUSTOMIZE KARNA BHI ZAROORI HAI",
+      "caption": "Resume ko job ke according customize karna bhi zaroori hai."
+    },
+    {
+      "id": "vo3",
+      "label": "TOOL",
+      "say": "ये website try करो!",
+      "on_screen": "YE WEBSITE TRY KARO",
+      "caption": "Ye website try karo."
+    },
+    {
+      "id": "vo4",
+      "label": "INTRO",
+      "say": "आज है AI for College Students, और website है Rezi AI।",
+      "on_screen": "AI FOR COLLEGE STUDENTS — REZI AI",
+      "caption": "Aaj hai AI for College Students, aur website hai Rezi AI."
+    },
+    {
+      "id": "vo5",
+      "label": "UPLOAD",
+      "say": "बस अपना resume upload करो।",
+      "on_screen": "BAS APNA RESUME UPLOAD KARO",
+      "caption": "Bas apna resume upload karo."
+    },
+    {
+      "id": "vo6",
+      "label": "JD",
+      "say": "Job description paste करो।",
+      "on_screen": "JOB DESCRIPTION PASTE KARO",
+      "caption": "Job description paste karo."
+    },
+    {
+      "id": "vo7",
+      "label": "TAILOR",
+      "say": "और ये तुम्हारे resume को उस job के according tailor कर देगा।",
+      "on_screen": "RESUME US JOB KE ACCORDING TAILOR",
+      "caption": "Aur ye tumhare resume ko us job ke according tailor kar dega."
+    },
+    {
+      "id": "vo8",
+      "label": "ATS",
+      "say": "साथ ही ATS score भी check कर सकते हो।",
+      "on_screen": "ATS SCORE BHI CHECK KAR SAKTE HO",
+      "caption": "Saath hi ATS score bhi check kar sakte ho."
+    },
+    {
+      "id": "vo9",
+      "label": "CTA",
+      "say": "Link और मेरा resume tailoring prompt चाहिए तो comment करो — resume! मैं DM कर दूँगा। और ऐसे useful AI tools के लिये follow कर लेना!",
+      "on_screen": "COMMENT KARO 'RESUME' · MAIN DM KAR DUNGA",
+      "caption": "Link aur mera resume tailoring prompt chahiye to comment karo resume. Main DM kar dunga, aur aise useful AI tools ke liye follow kar lena."
+    }
+  ]
+}

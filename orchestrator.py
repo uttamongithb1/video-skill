@@ -387,36 +387,34 @@ class PremiumOrchestrator:
                                 add_end_screen)
         self.generate_scenes(scenes, detected_topic, is_technical)
 
-        # Create/overwrite timeline.json from segments when no real VO timeline exists
-        sections_path = self.root / "assets" / "vo" / "sections.json"
+        # Always create/overwrite timeline.json from the parsed segments
         tl_path = self.root / "assets" / "vo" / "timeline.json"
-        if not sections_path.exists():
-            tl_path.parent.mkdir(parents=True, exist_ok=True)
-            # Timeline sections match non-transition scene compositions
-            # Uses FINAL scene timings (after transitions inserted)
-            non_trans = [s for s in scenes if s.scene_type != "transition"]
-            tl_data = {
-                "tempo_factor": 1.0,
-                "lead_in": 0.30,
-                "tail": 1.15,
-                "gap": 0.30,
-                "script_target": None,
-                "root_duration": round(scenes[-1].end + 1.15, 3),
-                "sections": [
-                    {
-                        "id": f"vo{i+1}",
-                        "label": s.scene_type.upper(),
-                        "script_start": None,
-                        "script_end": None,
-                        "start": round(s.start, 3),
-                        "dur": round(s.duration, 3),
-                        "end": round(s.end, 3),
-                        "file": f"assets/vo/wav/vo{i+1}.wav",
-                    }
-                    for i, s in enumerate(non_trans)
-                ],
-            }
-            tl_path.write_text(json.dumps(tl_data, indent=2))
+        tl_path.parent.mkdir(parents=True, exist_ok=True)
+        # Timeline sections match non-transition scene compositions
+        # Uses FINAL scene timings (after transitions inserted)
+        non_trans = [s for s in scenes if s.scene_type != "transition"]
+        tl_data = {
+            "tempo_factor": 1.0,
+            "lead_in": 0.30,
+            "tail": 1.15,
+            "gap": 0.30,
+            "script_target": None,
+            "root_duration": round(scenes[-1].end + 1.15, 3),
+            "sections": [
+                {
+                    "id": f"vo{i+1}",
+                    "label": s.scene_type.upper(),
+                    "script_start": None,
+                    "script_end": None,
+                    "start": round(s.start, 3),
+                    "dur": round(s.duration, 3),
+                    "end": round(s.end, 3),
+                    "file": f"assets/vo/wav/vo{i+1}.wav",
+                }
+                for i, s in enumerate(non_trans)
+            ],
+        }
+        tl_path.write_text(json.dumps(tl_data, indent=2))
 
         # Run prepare.py validation
         prep_cmd = [sys.executable,
