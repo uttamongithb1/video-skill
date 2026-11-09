@@ -7,3 +7,7 @@ assets/vo/timeline.json
 assets/vo/wav/
 renders/
 .rpmdb
+
+# Generated files (do not commit)
+assets/vo/script_converted.txt
+assets/vo/timeline.json
