@@ -1,47 +1,37 @@
+#!/usr/bin/env python3
 """
-Premium Orchestrator — v3.0
-============================
+Premium Orchestrator — v3.3 (Anchor Grid + Sound)
 
-Senior-agent pipeline that converts a voice script into a premium HyperFrames
-video. Handles:
-
-  1. Script parsing (plain text or [start-end] timestamped segments)
-  2. Topic detection → premium animation + evidence decision
-  3. Audio sync — voiceover timestamps, SFX cues (whoosh/pop/ding), music bed
-  4. Scene decomposition with premium types (hook, section, body, emphasis, animation, evidence, lower_third, cta, end_screen, transition)
-  5. Kinetic typography generation (per-word animation)
-  6. Media download commands (yt-dlp style) for evidence sourcing
-  7. Design-contract validation
-  8. HTML assembly
+Pipeline:
+  1. Parse voice script into timestamped segments
+  2. Detect topic → animation + evidence decision
+  3. Generate scene compositions (compositions/sN-*.html) using anchor grid
+  4. Run prepare.py (validation gate + token injection)
+  5. Run build_index.py (root HTML with contiguous timing + wipes)
+  6. Return report with audio cues + media search queries
 
 Usage:
     from orchestrator import PremiumOrchestrator
     orch = PremiumOrchestrator()
-    html, report = orch.build("my_script.txt", topic="Tor", voiceover="voice.mp3", music="music.mp3")
+    html_path, report = orch.build("my_script.txt", topic="Tor")
 """
-
 from __future__ import annotations
 
+import json
 import re
+import subprocess
+import sys
 from dataclasses import dataclass, field
-from typing import List, Tuple, Optional, Dict
+from pathlib import Path
+from typing import List, Optional, Tuple, Dict
 
-from design_system import (
-    PALETTE, MOTION, TYPOGRAPHY, LAYOUT, ALIGNMENT_RULES, SCENE_TYPES,
-    premium_css_variables, base_scene_css, validate_scene as ds_validate,
-)
-from animations import (
-    kinetic_hook_html, kinetic_section_html, body_line_html,
-    tor_diagram_html, glass_evidence_card_html, lower_third_html,
-    end_screen_html, scene_transition_html,
-)
-from media_sourcing import build_search_queries  # type: ignore
+from design_system import DESIGN_TOKENS, ALIGNMENT_RULES, SCENE_TYPES, validate_scene
+from media_sourcing import build_search_queries
 
-WIDTH = LAYOUT["canvas_w"]
-HEIGHT = LAYOUT["canvas_h"]
-FPS = LAYOUT["fps"]
+WIDTH = DESIGN_TOKENS["resolution"]["width"]
+HEIGHT = DESIGN_TOKENS["resolution"]["height"]
+FPS = DESIGN_TOKENS["resolution"]["fps"]
 
-# ── Technical topics that trigger premium animation + evidence ────────────
 TECHNICAL_TOPICS = {
     "tor", "onion", "anonymous browsing", "dark web", "vpn", "proxy",
     "isp", "relay", "network", "packet", "encryption", "cybersecurity",
@@ -67,13 +57,8 @@ class Scene:
     lower_third_value: Optional[str] = None
     needs_transition_in: bool = False
     transition_kind: str = "wipe"
-    audio_cue: Optional[str] = None  # 'whoosh' | 'pop' | 'ding' | None
-    music_beat: bool = False
+    audio_cue: Optional[str] = None
     warnings: List[str] = field(default_factory=list)
-
-    @property
-    def html(self) -> str:
-        return build_scene_html(self)
 
 
 @dataclass
@@ -89,22 +74,24 @@ class BuildReport:
     search_queries: dict = field(default_factory=dict)
     audio_cues: List[str] = field(default_factory=list)
     media_download_commands: List[str] = field(default_factory=list)
+    html_path: str = ""
 
 
 class PremiumOrchestrator:
-    def __init__(self, wpm: int = 145):  # slightly slower for premium readability
+    def __init__(self, wpm: int = 145):
         self.wpm = wpm
+        self.root = Path(__file__).resolve().parent
 
     # ── 1. Parse script ──────────────────────────────────────────────
     def parse_script(self, path: str) -> List[dict]:
         with open(path, "r", encoding="utf-8") as f:
             raw = f.read()
-
         lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
         segments = []
         cursor = 0.0
-        ts_re = re.compile(r"^\s*\[(\d+(?:\.\d+)?)\s*[-–—]\s*(\d+(?:\.\d+)?)\s*s?\]\s*(.*)$")
-
+        ts_re = re.compile(
+            r"^\s*\[(\d+(?:\.\d+)?)\s*[-–—]\s*(\d+(?:\.\d+)?)\s*s?\]\s*(.*)$"
+        )
         for ln in lines:
             m = ts_re.match(ln)
             if m:
@@ -116,8 +103,6 @@ class PremiumOrchestrator:
                 dur = self._estimate_duration(text)
                 start, end = cursor, cursor + dur
                 cursor = end
-
-            # Detect emphasis: **word** or ALL-CAPS phrase
             is_emph = bool(re.search(r"\*\*.*?\*\*", ln)) or bool(
                 re.search(r"\b[A-Z][A-Z\s]{2,}\b", text))
             emphasis_word = None
@@ -127,9 +112,7 @@ class PremiumOrchestrator:
                 if not emphasis_word:
                     m3 = re.search(r"\b([A-Z][A-Z\s]{2,})\b", text)
                     emphasis_word = m3.group(1).strip() if m3 else None
-
             display = re.sub(r"\*\*(.*?)\*\*", r"\1", text).strip()
-
             segments.append({
                 "start": start, "end": end, "duration": end - start,
                 "text": display, "is_emphasis": is_emph,
@@ -146,18 +129,16 @@ class PremiumOrchestrator:
         combined = " ".join(s["text"] for s in segments).lower()
         detected = "general"
         is_tech = False
-
         for topic in TECHNICAL_TOPICS:
             if re.search(rf"\b{re.escape(topic)}\b", combined):
                 detected = topic
                 is_tech = True
                 break
-
         category = "tor" if detected == "tor" else "generic_technical"
         queries = build_search_queries(detected, category) if is_tech else {}
         return detected, is_tech, queries
 
-    # ── 3. Decompose into premium scenes ────────────────────────────
+    # ── 3. Decompose into anchor-grid scenes ─────────────────────────
     def decompose(
         self,
         segments: List[dict],
@@ -165,31 +146,22 @@ class PremiumOrchestrator:
         is_technical: bool,
         add_end_screen: bool = True,
     ) -> List[Scene]:
-        """Build scenes with proper cumulative timing and transitions."""
-        raw_scenes: List[Scene] = []
+        raw: List[Scene] = []
         n = len(segments)
-
         for i, seg in enumerate(segments):
             if i == 0:
-                stype = "hook"
-                audio_cue = "pop"
+                stype, audio_cue = "hook", "pop"
             elif i == n - 1:
-                stype = "cta"
-                audio_cue = "ding"
+                stype, audio_cue = "cta", "ding"
             elif seg["is_emphasis"]:
-                stype = "body_right"
-                audio_cue = "pop"
+                stype, audio_cue = "body_right", "pop"
             else:
-                stype = "body_left"
-                audio_cue = None
+                stype, audio_cue = "body_left", None
 
-            needs_anim = False
-            needs_evid = False
+            needs_anim = needs_evid = False
             ev_sources = []
-
             if is_technical and stype == "body_left" and i == 1:
-                needs_anim = True
-                needs_evid = True
+                needs_anim = needs_evid = True
                 ev_sources = [
                     {"platform": "YouTube", "url": "",
                      "caption": f"{topic} official animation"},
@@ -204,186 +176,200 @@ class PremiumOrchestrator:
                 is_emphasis=seg["is_emphasis"],
                 emphasis_word=seg["emphasis_word"],
                 needs_animation=needs_anim, needs_evidence=needs_evid,
-                evidence_sources=ev_sources,
-                audio_cue=audio_cue,
+                evidence_sources=ev_sources, audio_cue=audio_cue,
             )
-            scene.warnings = ds_validate({
+            scene.warnings = validate_scene({
                 "type": stype, "duration": seg["duration"], "text": seg["text"]
             })
-            raw_scenes.append(scene)
+            raw.append(scene)
 
-        # Premium end screen
-        if add_end_screen and raw_scenes:
-            last = raw_scenes[-1]
-            raw_scenes.append(Scene(
+        if add_end_screen and raw:
+            last = raw[-1]
+            raw.append(Scene(
                 start=last.end, end=last.end + 5.0, duration=5.0,
                 text="Subscribe for more",
-                scene_type="end_screen",
-                audio_cue="ding",
+                scene_type="end_screen", audio_cue="ding",
             ))
 
-        # Build final list with transitions and cumulative timing
+        # Build final list with transitions + cumulative timing
         scenes: List[Scene] = []
         cursor = 0.0
-        TRANSITION_DUR = 0.6
-
-        for i, sc in enumerate(raw_scenes):
-            # Reset scene timing to cursor
+        TRANS = 0.6
+        for i, sc in enumerate(raw):
             sc.start = cursor
             sc.end = cursor + sc.duration
             cursor = sc.end
-
             scenes.append(sc)
-
-            # Insert transition before animation/CTA scenes (but not the first scene)
             is_first = (i == 0)
-            needs_transition_before = (
+            needs_trans = (
                 not is_first and
                 (sc.needs_animation or sc.scene_type == "cta")
             )
-            if needs_transition_before:
-                # The transition goes BETWEEN previous scene and this one.
-                # Since we already added sc, insert transition before it.
+            if needs_trans:
                 trans_start = scenes[-2].end if len(scenes) >= 2 else 0.0
                 trans = Scene(
-                    start=trans_start, end=trans_start + TRANSITION_DUR,
-                    duration=TRANSITION_DUR, text="", scene_type="transition",
+                    start=trans_start, end=trans_start + TRANS,
+                    duration=TRANS, text="", scene_type="transition",
                     transition_kind="wipe",
                 )
                 scenes.insert(-1, trans)
-                # Shift this scene (and all after) by transition duration
-                sc.start += TRANSITION_DUR
-                sc.end += TRANSITION_DUR
-                cursor += TRANSITION_DUR
+                sc.start += TRANS
+                sc.end += TRANS
+                cursor += TRANS
 
-        return scenes    # ── 4. Assemble HTML ────────────────────────────────────────────
-    def assemble(
-        self,
-        scenes: List[Scene],
-        topic: str,
-        is_technical: bool,
-        search_queries: dict,
-        voiceover: Optional[str] = None,
-        music: Optional[str] = None,
-    ) -> str:
-        css = premium_css_variables() + base_scene_css()
-        scene_blocks = []
+        return scenes
 
-        for sc in scenes:
-            block = self._scene_to_html(sc, topic)
-            scene_blocks.append(block)
+    # ── 4. Generate scene composition files ──────────────────────────
+    def generate_scenes(self, scenes: List[Scene], topic: str,
+                        is_technical: bool) -> None:
+        """Write compositions/sN-*.html files using new_scene.py logic."""
+        comp_dir = self.root / "compositions"
+        comp_dir.mkdir(parents=True, exist_ok=True)
 
-        # Audio block (HyperFrames <hf-audio> if supported, else comment)
-        audio_block = ""
-        if voiceover or music:
-            audio_block = f"""
-  <!-- AUDIO TRACKS — HyperFrames audio engine -->
-  <!-- voiceover: {voiceover or 'none'} -->
-  <!-- music: {music or 'none'} -->
-  <!-- SFX cues: whoosh, pop, ding placed at scene start times -->
-"""
+        # Clear old scene files (keep template + wipe)
+        for f in comp_dir.glob("s*.html"):
+            if f.name not in ("_scene-base.html.tmpl", "wipe.html"):
+                f.unlink()
 
-        total_dur = scenes[-1].end if scenes else 30.0
+        field_cycle = ["accent", "ground", "ink", "secondary",
+                       "tertiary", "quaternary"]
+        poses = ["p1_shrug.png", "p2_facepalm.png", "p3_present.png",
+                 "p4_chin.png", "p5_memory.png", "p6_thumbs.png",
+                 "p7_cta.png", "p8_point.png", "p9_idea.png"]
 
-        html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Premium Explainer — {topic}</title>
-<style>{css}</style>
-</head>
-<body>
+        scene_idx = 0
+        for i, sc in enumerate(scenes):
+            if sc.scene_type == "transition":
+                continue  # transitions handled by build_index.py
 
-<template id="root">
-  <!-- Premium Orchestrator v3.0 — topic: {topic} | technical: {is_technical} -->
-  {''.join(scene_blocks)}
-</template>
+            # Determine archetype
+            if sc.scene_type == "cta" or sc.scene_type == "end_screen":
+                arch = "type-led"
+            elif sc.scene_type == "animation":
+                arch = "card-led"
+            elif sc.scene_type == "hook":
+                arch = "card-led"
+            elif sc.scene_type in ("body_left", "body_right"):
+                arch = "card-led" if len(sc.text) > 60 else "type-led"
+            else:
+                arch = "card-led"
 
-{audio_block}
+            # Field cycle (never repeat neighbor)
+            field = field_cycle[scene_idx % len(field_cycle)]
+            if scene_idx > 0:
+                prev_field = field_cycle[(scene_idx - 1) % len(field_cycle)]
+                if field == prev_field:
+                    field = field_cycle[(scene_idx + 1) % len(field_cycle)]
 
-<script>
-  /* HyperFrames variables — fill media URLs here */
-  /* data-var-src attributes are in evidence cards above */
-  /* Audio: voiceover="{voiceover or ''}" music="{music or ''}" */
-</script>
-</body>
-</html>"""
-        return html
+            pose = poses[scene_idx % len(poses)]
 
-    def _scene_to_html(self, sc: Scene, topic: str) -> str:
-        if sc.scene_type == "transition":
-            return scene_transition_html(
-                kind=sc.transition_kind, duration=sc.duration,
-                start=sc.start, track=99,
-            )
-        if sc.needs_animation:
-            return tor_diagram_html(
-                duration=sc.duration, start=sc.start, track=10, topic=topic,
-                evidence_sources=sc.evidence_sources if sc.needs_evidence else None,
-            )
-        if sc.needs_evidence:
-            return glass_evidence_card_html(
-                f"{sc.start}-{sc.end}s", sc.text, sc.evidence_sources,
-                duration=sc.duration, start=sc.start, track=50,
-            )
-        if sc.scene_type == "hook":
-            return kinetic_hook_html(
-                sc.text, emoji="😩", duration=sc.duration,
-                start=sc.start, track=1,
-            )
-        if sc.scene_type == "section":
-            return kinetic_section_html(
-                sc.text, duration=sc.duration, start=sc.start, track=2,
-            )
-        if sc.scene_type == "emphasis" or (sc.scene_type == "body_right" and sc.is_emphasis):
-            return body_line_html(
-                sc.text, align="right", emphasis_word=sc.emphasis_word,
-                duration=sc.duration, start=sc.start, track=3,
-            )
-        if sc.scene_type == "body_right":
-            return body_line_html(
-                sc.text, align="right", duration=sc.duration,
-                start=sc.start, track=3,
-            )
-        if sc.scene_type == "body_left":
-            return body_line_html(
-                sc.text, align="left", duration=sc.duration,
-                start=sc.start, track=2,
-            )
-        if sc.scene_type == "cta":
-            return f"""
-  <div class="scene cta" data-start="{sc.start:.2f}" data-duration="{sc.duration:.2f}" data-track-index="4">
-    <div class="text-safe">
-      <div style="font-size: {TYPOGRAPHY['cta']['size']}; font-weight: {TYPOGRAPHY['cta']['weight']};
-                  line-height: {TYPOGRAPHY['cta']['line_height']}; letter-spacing: {TYPOGRAPHY['cta']['tracking']};
-                  text-align: center; color: var(--cream); margin-bottom: 24px;
-                  animation: scaleReveal 0.8s var(--ease-premium) forwards;">
-        {sc.text}
-      </div>
-      <div style="font-size: 28px; font-weight: 600; color: var(--gold);
-                  animation: popIn 0.6s var(--ease-premium) forwards 1s;">
-        Tap the link in bio
-      </div>
-    </div>
-  </div>"""
-        if sc.scene_type == "end_screen":
-            return end_screen_html(
-                sc.text, duration=sc.duration, start=sc.start, track=90,
-            )
-        if sc.scene_type == "lower_third":
-            return lower_third_html(
-                sc.lower_third_label or "SOURCE",
-                sc.lower_third_value or sc.text,
-                duration=sc.duration, start=sc.start, track=60,
-            )
-        # Fallback
-        return body_line_html(
-            sc.text, align="left", duration=sc.duration,
-            start=sc.start, track=2,
-        )
+            # Build hero/chip/card from text
+            words = sc.text.split()
+            hero = " ".join(words[:3]) if len(words) > 3 else sc.text
+            chip = sc.text if len(sc.text) <= 40 else " ".join(words[3:6])
+            if len(chip) < 3:
+                chip = sc.text
 
-    # ── 5. Public build ─────────────────────────────────────────────
+            card_title = ""
+            card_meta = ""
+            card_body = ""
+            line1 = ""
+            line2 = ""
+
+            # SVG animation for technical topics (embedded in card body)
+            svg_anim = (
+                '<div style="position:absolute;inset:0;background:var(--maroon);'
+                'display:flex;align-items:center;justify-content:center;">'
+                '<svg width="600" height="400" viewBox="0 0 600 400" '
+                'xmlns="http://www.w3.org/2000/svg">'
+                '<polyline points="80,200 220,200 360,200 500,200 560,200" '
+                'stroke="var(--ink-soft)" stroke-width="3" fill="none" '
+                'stroke-dasharray="10 6" opacity="0.5"/>'
+                '<circle cx="80" cy="200" r="20" fill="var(--maroon-dark)" '
+                'stroke="var(--cream)" stroke-width="3"/>'
+                '<circle cx="220" cy="200" r="20" fill="var(--maroon-dark)" '
+                'stroke="var(--cream)" stroke-width="3"/>'
+                '<circle cx="360" cy="200" r="20" fill="var(--maroon-dark)" '
+                'stroke="var(--cream)" stroke-width="3"/>'
+                '<circle cx="500" cy="200" r="20" fill="var(--maroon-dark)" '
+                'stroke="var(--cream)" stroke-width="3"/>'
+                '<circle cx="560" cy="200" r="20" fill="var(--maroon-dark)" '
+                'stroke="var(--cream)" stroke-width="3"/>'
+                '<text x="80" y="225" text-anchor="middle" fill="var(--cream)" '
+                'font-family="var(--font-display)" font-weight="950" font-size="14">USER</text>'
+                '<text x="220" y="225" text-anchor="middle" fill="var(--cream)" '
+                'font-family="var(--font-display)" font-weight="950" font-size="14">ISP</text>'
+                '<text x="360" y="225" text-anchor="middle" fill="var(--cream)" '
+                'font-family="var(--font-display)" font-weight="950" font-size="14">ENTRY</text>'
+                '<text x="500" y="225" text-anchor="middle" fill="var(--cream)" '
+                'font-family="var(--font-display)" font-weight="950" font-size="14">EXIT</text>'
+                '<circle cx="80" cy="200" r="8" fill="var(--gold)">'
+                '<animateMotion path="M 80,200 L 220,200 L 360,200 L 500,200 L 560,200" '
+                'dur="4s" repeatCount="indefinite"/></circle>'
+                '</svg></div>'
+            )
+
+            if sc.scene_type == "hook":
+                card_title = sc.text
+                card_meta = topic.upper()
+            elif sc.needs_animation:
+                card_title = topic.upper() + " Architecture"
+                card_meta = "Verified path"
+                card_body = svg_anim
+                sc.scene_type = "animation"
+            elif sc.scene_type == "cta":
+                card_title = "Get shortlisted"
+                card_meta = "Customize per company"
+            elif sc.scene_type == "end_screen":
+                card_title = "Subscribe"
+                card_meta = "@uttambhartiyaa"
+            elif sc.scene_type in ("body_left", "body_right"):
+                card_title = sc.text
+                card_meta = ""
+
+            # Build new_scene.py CLI args
+            cmd = [
+                sys.executable,
+                str(self.root / "scripts" / "new_scene.py"),
+                "--n", str(scene_idx + 1),
+                "--name", sc.scene_type,
+                "--arch", arch,
+                "--field", field,
+                "--pose", pose,
+                "--kicker", topic.upper(),
+                "--hero", hero,
+                "--chip", chip,
+                "--card-title", card_title,
+                "--card-meta", card_meta,
+            ]
+            if card_body:
+                cmd += ["--card-body", card_body]
+            if line1:
+                cmd += ["--line1", line1]
+            if line2:
+                cmd += ["--line2", line2]
+            if sc.scene_type == "end_screen":
+                cmd += ["--no-cover"]
+            if i == len(scenes) - 1:
+                cmd += ["--no-cover"]
+
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"WARN  new_scene.py failed for scene {scene_idx + 1}: "
+                      f"{result.stderr}")
+            scene_idx += 1
+
+    # ── 5. Build root HTML ──────────────────────────────────────────
+    def build_root(self) -> str:
+        """Run build_index.py and return index.html path."""
+        idx = self.root / "index.html"
+        cmd = [sys.executable, str(self.root / "scripts" / "build_index.py")]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"WARN  build_index.py failed: {result.stderr}")
+        return str(idx)
+
+    # ── 6. Public build ─────────────────────────────────────────────
     def build(
         self,
         script_path: str,
@@ -397,11 +383,52 @@ class PremiumOrchestrator:
         if topic:
             detected_topic = topic
 
-        scenes = self.decompose(segments, detected_topic, is_technical, add_end_screen)
-        html = self.assemble(
-            scenes, detected_topic, is_technical, queries,
-            voiceover=voiceover, music=music,
-        )
+        scenes = self.decompose(segments, detected_topic, is_technical,
+                                add_end_screen)
+        self.generate_scenes(scenes, detected_topic, is_technical)
+
+        # Create/overwrite timeline.json from segments when no real VO timeline exists
+        sections_path = self.root / "assets" / "vo" / "sections.json"
+        tl_path = self.root / "assets" / "vo" / "timeline.json"
+        if not sections_path.exists():
+            tl_path.parent.mkdir(parents=True, exist_ok=True)
+            # Timeline sections match non-transition scene compositions
+            # Uses FINAL scene timings (after transitions inserted)
+            non_trans = [s for s in scenes if s.scene_type != "transition"]
+            tl_data = {
+                "tempo_factor": 1.0,
+                "lead_in": 0.30,
+                "tail": 1.15,
+                "gap": 0.30,
+                "script_target": None,
+                "root_duration": round(scenes[-1].end + 1.15, 3),
+                "sections": [
+                    {
+                        "id": f"vo{i+1}",
+                        "label": s.scene_type.upper(),
+                        "script_start": None,
+                        "script_end": None,
+                        "start": round(s.start, 3),
+                        "dur": round(s.duration, 3),
+                        "end": round(s.end, 3),
+                        "file": f"assets/vo/wav/vo{i+1}.wav",
+                    }
+                    for i, s in enumerate(non_trans)
+                ],
+            }
+            tl_path.write_text(json.dumps(tl_data, indent=2))
+
+        # Run prepare.py validation
+        prep_cmd = [sys.executable,
+                    str(self.root / "scripts" / "prepare.py")]
+        prep_result = subprocess.run(prep_cmd, capture_output=True, text=True)
+        prep_warnings = []
+        if prep_result.returncode != 0:
+            prep_warnings = [l.strip() for l in prep_result.stdout.splitlines()
+                             if l.strip().startswith(("FAIL", "WARN"))]
+
+        # Build root HTML
+        html_path = self.build_root()
 
         report = BuildReport(
             total_scenes=len(scenes),
@@ -410,56 +437,46 @@ class PremiumOrchestrator:
             evidence_blocks=sum(1 for s in scenes if s.needs_evidence),
             transitions=sum(1 for s in scenes if s.scene_type == "transition"),
             lower_thirds=sum(1 for s in scenes if s.scene_type == "lower_third"),
-            kinetic_scenes=sum(1 for s in scenes if s.scene_type in ("hook", "section", "body_left", "body_right")),
-            warnings=[w for s in scenes for w in s.warnings],
+            kinetic_scenes=sum(1 for s in scenes
+                               if s.scene_type in ("hook", "section",
+                                                   "body_left", "body_right")),
+            warnings=prep_warnings,
             search_queries=queries,
             audio_cues=[s.audio_cue for s in scenes if s.audio_cue],
+            html_path=html_path,
         )
-
-        # Media download commands for evidence sourcing
-        if is_technical and queries:
-            cmds = []
-            for platform, qlist in queries.items():
-                for q in qlist[:2]:  # top 2 per platform
-                    if platform == "youtube":
-                        cmds.append(f'yt-dlp -f "bestvideo[height<=1080]+bestaudio/best" --merge-output-format mp4 "ytsearch1:{q}" -o "assets/media/%(title)s.%(ext)s"')
-                    elif platform == "image":
-                        cmds.append(f'# Download image: {q}')
-            report.media_download_commands = cmds
-
-        return html, report
+        return html_path, report
 
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(
         description="Premium Orchestrator: voice script → HyperFrames HTML")
-    parser.add_argument("--script", required=True, help="Path to voice script (.txt)")
-    parser.add_argument("--topic", default=None, help="Force topic (e.g. 'Tor')")
-    parser.add_argument("--voiceover", default=None, help="Voiceover audio file path")
-    parser.add_argument("--music", default=None, help="Background music file path")
-    parser.add_argument("--output", default="index.html", help="Output HTML path")
-    parser.add_argument("--wpm", type=int, default=145, help="Words per minute")
-    parser.add_argument("--no-end-screen", action="store_true", help="Skip end screen")
+    parser.add_argument("--script", required=True, help="Path to voice script")
+    parser.add_argument("--topic", default=None,
+                        help="Force topic (e.g. 'Tor') for animation")
+    parser.add_argument("--voiceover", default=None,
+                        help="Voiceover audio file path")
+    parser.add_argument("--music", default=None,
+                        help="Background music file path")
+    parser.add_argument("--output", default="index.html",
+                        help="Output HTML path")
+    parser.add_argument("--wpm", type=int, default=145)
+    parser.add_argument("--no-end-screen", action="store_true")
     args = parser.parse_args()
 
-    from pathlib import Path
-    script_path = Path(args.script)
+    from pathlib import Path as _Path
+    script_path = _Path(args.script)
     if not script_path.exists():
         print(f"ERROR: Script not found: {script_path}")
-        raise SystemExit(1)
+        sys.exit(1)
 
     orch = PremiumOrchestrator(wpm=args.wpm)
-    html, report = orch.build(
-        str(script_path),
-        topic=args.topic,
-        voiceover=args.voiceover,
-        music=args.music,
+    html_path, report = orch.build(
+        str(script_path), topic=args.topic,
+        voiceover=args.voiceover, music=args.music,
         add_end_screen=not args.no_end_screen,
     )
-
-    with open(args.output, "w", encoding="utf-8") as f:
-        f.write(html)
 
     print(f"✓ Premium build: {report.total_scenes} scene(s)")
     print(f"✓ Duration: {report.total_duration:.1f}s")
@@ -468,21 +485,20 @@ def main():
     print(f"✓ Transitions: {report.transitions}")
     print(f"✓ Kinetic scenes: {report.kinetic_scenes}")
     print(f"✓ Audio cues: {', '.join(report.audio_cues) or 'none'}")
-    print(f"✓ Wrote {args.output}")
+    print(f"✓ HTML: {report.html_path}")
     if report.warnings:
         print(f"⚠ Warnings: {report.warnings}")
     if report.search_queries:
         print(f"🔍 Search queries: {list(report.search_queries.keys())}")
-    if report.media_download_commands:
-        print(f"⬇️  Media download commands: {len(report.media_download_commands)}")
     print("")
     print("Next steps:")
-    print("  1. Place HTML in HyperFrames project (npx hyperframes init my-video)")
-    print("  2. Add voiceover + music files to assets/audio/")
-    print("  3. Fill data-var-src URLs in evidence cards")
-    print("  4. Run media download commands for evidence assets")
-    print("  5. npx hyperframes preview")
-    print("  6. npx hyperframes render")
+    print("  1. python3 scripts/prepare.py          (validation gate)")
+    print("  2. npx hyperframes lint                (0 errors gate)")
+    print("  3. npx hyperframes preview")
+    print("  4. npx hyperframes render")
+    print("  5. python3 scripts/gen_sfx.py          (synthesize SFX)")
+    print("  6. python3 scripts/mix_audio.py        (VO + cues + bed → master.wav)")
+    print("  7. ffmpeg mux → final.mp4")
 
 
 if __name__ == "__main__":

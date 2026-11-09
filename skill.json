@@ -1,28 +1,32 @@
 {
   "name": "resume-reject-video",
-  "version": "3.0.0",
-  "description": "Premium senior-agent orchestration skill: voice script → HyperFrames HTML with kinetic typography, glassmorphism, SVG animations, audio sync cues, and media sourcing for YouTube/Instagram/forums/websites.",
+  "version": "3.3.0",
+  "description": "Premium senior-agent orchestration skill: voice script → HyperFrames HTML with anchor-grid layout, kinetic typography, SVG animations, glassmorphism evidence cards, complete sound system (SFX synthesis + cue sheet + audio mixing), and design-contract validation.",
   "author": "Arena Agent",
   "entrypoint": "generate.py",
   "runtime": "python3",
   "pipeline": [
     "parse_script",
     "detect_topic",
-    "decompose_premium_scenes",
-    "insert_transitions",
-    "generate_kinetic_typography",
-    "assemble_html",
-    "validate_design_contract"
+    "decompose_anchor_grid_scenes",
+    "generate_scene_compositions",
+    "prepare_validation_gate",
+    "build_index_root_html",
+    "hyperframes_lint",
+    "hyperframes_render",
+    "gen_sfx",
+    "mix_audio",
+    "ffmpeg_mux"
   ],
   "inputs": {
     "script": {
       "type": "string",
-      "description": "Path to a .txt voice script. Plain lines (auto-timed ~145 wpm) or [start-end] Text segments. Use **word** for emphasis (right-aligned brand anchor with pop animation).",
+      "description": "Path to a .txt voice script. Plain lines (auto-timed ~145 wpm) or [start-end] Text segments. Use **word** for emphasis.",
       "required": true
     },
     "topic": {
       "type": "string",
-      "description": "Force a topic (e.g. 'Tor', 'VPN', 'AI') to trigger premium animation + evidence. Auto-detected if omitted.",
+      "description": "Force a topic (e.g. 'Tor', 'VPN', 'AI') to trigger animation + evidence. Auto-detected if omitted.",
       "required": false,
       "default": null
     },
@@ -60,50 +64,47 @@
   "outputs": {
     "html": {
       "type": "file",
-      "description": "Premium HyperFrames index.html composition ready for npx hyperframes preview / render"
+      "description": "Premium HyperFrames index.html composition"
+    },
+    "scene_files": {
+      "type": "array",
+      "description": "Generated compositions/sN-*.html files"
     },
     "report": {
       "type": "object",
-      "description": "Build report with scene count, duration, animations, evidence, transitions, kinetic scenes, audio cues, warnings, search queries, media download commands"
+      "description": "Build report with scene count, duration, animations, evidence, transitions, audio cues, warnings, search queries"
     }
   },
-  "styling": {
-    "resolution": "1280x720",
-    "fps": 30,
-    "palette": {
-      "dark_bg": "#6C0013",
-      "dark_text": "#FFF8F0",
-      "light_bg": "#EBE6F0",
-      "light_text": "#0F0C14",
-      "accent": "#FFD700",
-      "glass": "rgba(255,255,255,0.65)",
-      "shadow_hard": "0 20px 60px rgba(108,0,19,0.25)"
-    },
-    "typography": {
-      "hook": "80px / weight 950",
-      "section": "64px / weight 900",
-      "body": "44px / weight 750",
-      "caption": "26px / weight 600",
-      "cta": "56px / weight 900"
-    },
-    "motion": {
-      "ease_premium": "cubic-bezier(0.23, 1, 0.32, 1)",
-      "ease_bounce": "cubic-bezier(0.68, -0.55, 0.27, 1.55)",
-      "pop_in": "0.45s",
-      "slide_in": "0.7s",
-      "ken_burns": "8s",
-      "stagger": "0.12s"
-    },
-    "alignment": {
-      "hook": "center, top band, kinetic pop",
-      "body_left": "left, slide-in from left",
-      "body_right": "right, slide-in from right, brand color",
-      "emphasis": "right, pop + scale, weight 950",
-      "cta": "center, bottom, scale reveal",
-      "animation": "center, SVG + Ken Burns",
-      "evidence": "left, glass card, lower third",
-      "transition": "motion-blur wipe"
-    }
+  "anchor_grid": {
+    "anchors": ["kicker", "hero", "body", "chip", "presenter"],
+    "layout": "bottom-fixed, only top half re-composes",
+    "frame_zero": "poster (data-cover=1)",
+    "motion": "transform-only, lands in first half of beat",
+    "fields": ["accent", "ground", "ink", "secondary", "tertiary", "quaternary"],
+    "field_rule": "no two neighbor scenes share a field"
+  },
+  "sound_system": {
+    "sfx_synthesis": "scripts/gen_sfx.py (14 SFX from scratch, no licensing)",
+    "cue_sheet": "assets/sfx/cues.json (section-relative offsets)",
+    "audio_mixer": "scripts/mix_audio.py (VO + cues + bed → master.wav)",
+    "loudness_target": "-14 LUFS",
+    "true_peak_max": "-1 dBTP",
+    "bed_level": "0.15 (≈ -29 LUFS, ≈13 LU under VO)",
+    "ducking": "none (level gap is the duck)",
+    "max_cues_per_second": 1.0
+  },
+  "scene_types": ["hook", "body_left", "body_right", "animation", "evidence", "cta", "end_screen", "transition"],
+  "archetypes": ["card-led", "stat-led", "type-led"],
+  "media_platforms": ["youtube", "instagram", "forum", "website", "image"],
+  "commands": {
+    "generate": "python3 generate.py --script <script> [--topic <topic>] [--voiceover <file>] [--music <file>]",
+    "validate": "python3 scripts/prepare.py",
+    "lint": "npx hyperframes lint",
+    "preview": "npx hyperframes preview",
+    "render": "npx hyperframes render",
+    "gen_sfx": "python3 scripts/gen_sfx.py",
+    "mix_audio": "python3 scripts/mix_audio.py",
+    "mux": "ffmpeg -i rendered.mp4 -i renders/master.wav -c:v copy -c:a aac -shortest final.mp4"
   },
   "technical_topics": [
     "tor", "onion", "anonymous browsing", "dark web", "vpn", "proxy",
@@ -111,24 +112,18 @@
     "dns", "cdn", "blockchain", "bitcoin", "ai", "machine learning",
     "how internet works", "neural network", "large language model"
   ],
-  "media_platforms": ["youtube", "instagram", "forum", "website", "image"],
-  "scene_types": [
-    "hook", "section", "body_left", "body_right", "emphasis",
-    "animation", "evidence", "lower_third", "cta", "end_screen", "transition"
-  ],
-  "commands": {
-    "generate": "python3 generate.py --script <script> [--topic <topic>] [--voiceover <file>] [--music <file>] --output index.html",
-    "preview": "npx hyperframes preview",
-    "render": "npx hyperframes render",
-    "download_media": "yt-dlp -f \"bestvideo[height<=1080]+bestaudio/best\" --merge-output-format mp4 \"ytsearch1:<query>\" -o \"assets/media/%(title)s.%(ext)s\""
-  },
   "example_input": ["example_script.txt", "example_technical.txt"],
   "example_output": ["output_simple.html", "output_technical.html"],
   "agent_workflow": [
     "1. Receive voice script + optional topic + optional audio files",
-    "2. Run generate.py",
-    "3. Read printed search queries + yt-dlp download commands",
-    "4. (Optional) Source/download media, fill data-var-src URLs in evidence cards",
-    "5. Return index.html + npx hyperframes preview/render commands"
+    "2. Run generate.py (creates scene compositions + index.html)",
+    "3. Run prepare.py (validation gate)",
+    "4. Run npx hyperframes lint (0 errors gate)",
+    "5. Read printed search queries + yt-dlp commands for media sourcing",
+    "6. (Optional) Source/download media, fill data-var-src URLs",
+    "7. Run gen_sfx.py (synthesize SFX)",
+    "8. Run mix_audio.py (VO + cues + bed → master.wav)",
+    "9. ffmpeg mux → final.mp4",
+    "10. Return index.html + render commands to user"
   ]
 }

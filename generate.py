@@ -1,33 +1,44 @@
 #!/usr/bin/env python3
 """
-Premium Video Skill — v3.2 Generator
+Premium Video Skill — v3.3 Generator
 ====================================
 
-Converts a voice script into a premium HyperFrames HTML video with
-kinetic typography, animations, evidence sourcing, AND audio sync.
+Converts a voice script into a premium HyperFrames HTML video using the
+anchor-grid pipeline (kicker → hero → body → chip → presenter).
+
+Pipeline:
+  generate.py → new_scene.py (scene files) → prepare.py (validation)
+  → build_index.py (root HTML) → hyperframes lint → hyperframes render
 
 Features:
   • Script parsing (plain text or [start-end] timestamped segments)
   • Topic detection → premium animation + evidence insertion
-  • Kinetic typography (per-word pop/slide/scale animations)
-  • Glassmorphism evidence cards + lower thirds + end screens
-  • Motion-blur transitions + Ken Burns camera moves
+  • Anchor grid: kicker, hero, body, chip, presenter (bottom-fixed)
+  • Six-color field cycle (no two neighbor scenes share a color)
+  • Presenter poses change every scene
+  • Kinetic typography within card components
+  • Motion-blur wipe transitions
   • Audio sync cues (whoosh/pop/ding) + voiceover + music markers
   • Media download commands (yt-dlp) for evidence sourcing
-  • Strict design-contract validation
+  • Strict design-contract validation (prepare.py)
 
 Usage:
     python3 generate.py --script my_script.txt --output index.html
     python3 generate.py --script tor_script.txt --topic Tor --output index.html
-    python3 generate.py --script my_script.txt --voiceover assets/audio/voice.mp3 --music assets/audio/music.mp3 --output index.html
+    python3 generate.py --script my_script.txt \
+        --voiceover assets/audio/voice.mp3 \
+        --music assets/audio/music.mp3 \
+        --output index.html
 
 Then:
+    python3 scripts/prepare.py          # validation gate
+    npx hyperframes lint                # 0 errors gate
     npx hyperframes preview
     npx hyperframes render
 
-Audio pipeline (run after generating HTML):
-    python3 scripts/gen_sfx.py              # synthesize SFX (one-time)
-    python3 scripts/mix_audio.py            # VO + cues + bed → master.wav
+Audio pipeline (run after rendering video):
+    python3 scripts/gen_sfx.py          # synthesize SFX (one-time)
+    python3 scripts/mix_audio.py        # VO + cues + bed → master.wav
     ffmpeg mux picture + master.wav → final.mp4
 """
 
@@ -44,15 +55,19 @@ from orchestrator import PremiumOrchestrator
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Convert a voice script into a premium HyperFrames HTML video "
-                    "with kinetic typography, animations, and evidence sourcing.")
-    parser.add_argument("--script", required=True, help="Path to voice script (.txt)")
+        description="Convert a voice script into a premium HyperFrames HTML "
+                    "video with anchor-grid layout, animations, and audio sync.")
+    parser.add_argument("--script", required=True,
+                        help="Path to voice script (.txt)")
     parser.add_argument("--topic", default=None,
-                        help="Force a topic (e.g. 'Tor', 'VPN', 'AI') for animation/evidence")
+                        help="Force a topic (e.g. 'Tor', 'VPN', 'AI') "
+                             "for animation/evidence")
     parser.add_argument("--voiceover", default=None,
-                        help="Voiceover audio file path (assets/audio/voice.mp3)")
+                        help="Voiceover audio file path "
+                             "(assets/audio/voice.mp3)")
     parser.add_argument("--music", default=None,
-                        help="Background music file path (assets/audio/music.mp3)")
+                        help="Background music file path "
+                             "(assets/audio/music.mp3)")
     parser.add_argument("--output", default="index.html",
                         help="Output HTML path (default: index.html)")
     parser.add_argument("--wpm", type=int, default=145,
@@ -67,16 +82,13 @@ def main() -> None:
         sys.exit(1)
 
     orch = PremiumOrchestrator(wpm=args.wpm)
-    html, report = orch.build(
+    html_path, report = orch.build(
         str(script_path),
         topic=args.topic,
         voiceover=args.voiceover,
         music=args.music,
         add_end_screen=not args.no_end_screen,
     )
-
-    with open(args.output, "w", encoding="utf-8") as f:
-        f.write(html)
 
     print(f"✓ Premium build: {report.total_scenes} scene(s)")
     print(f"✓ Duration: {report.total_duration:.1f}s")
@@ -85,7 +97,7 @@ def main() -> None:
     print(f"✓ Transitions: {report.transitions}")
     print(f"✓ Kinetic scenes: {report.kinetic_scenes}")
     print(f"✓ Audio cues: {', '.join(report.audio_cues) or 'none'}")
-    print(f"✓ Wrote {args.output}")
+    print(f"✓ HTML: {report.html_path}")
     if report.warnings:
         print(f"⚠ Warnings: {report.warnings}")
     if report.search_queries:
@@ -96,15 +108,14 @@ def main() -> None:
             print(f"     {c}")
     print("")
     print("Next steps:")
-    print("  1. Place this HTML in a HyperFrames project (npx hyperframes init my-video)")
-    print("  2. Add voiceover + music to assets/audio/")
-    print("  3. Fill data-var-src URLs in evidence cards")
-    print("  4. Run media download commands for evidence assets")
-    print("  5. Generate SFX: python3 scripts/gen_sfx.py")
-    print("  6. Mix audio:  python3 scripts/mix_audio.py")
-    print("  7. Mux:        ffmpeg -i index_rendered.mp4 -i renders/master.wav -c:v copy -c:a aac -shortest final.mp4")
-    print("  8. Preview:    npx hyperframes preview")
-    print("  9. Render:     npx hyperframes render")
+    print("  1. python3 scripts/prepare.py          # validation gate")
+    print("  2. npx hyperframes lint                # 0 errors gate")
+    print("  3. npx hyperframes preview")
+    print("  4. npx hyperframes render              # MP4 output")
+    print("  5. python3 scripts/gen_sfx.py          # synthesize SFX")
+    print("  6. python3 scripts/mix_audio.py        # VO + cues + bed → master.wav")
+    print("  7. ffmpeg -i rendered.mp4 -i renders/master.wav \\")
+    print("         -c:v copy -c:a aac -shortest final.mp4")
 
 
 if __name__ == "__main__":

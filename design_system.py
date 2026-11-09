@@ -16,6 +16,41 @@ Premium pillars:
 from __future__ import annotations
 
 # ─── Premium color palette (measured + elevated) ─────────────────────────
+
+DESIGN_TOKENS = {
+    "resolution": {"width": 1280, "height": 720, "fps": 30},
+    "colors": {
+        "maroon_bg": "rgb(108, 0, 19)",
+        "maroon_near_black": "rgb(26, 21, 21)",
+        "cream_text": "rgb(232, 219, 209)",
+        "lavender_bg": "rgb(218, 209, 221)",
+        "ink_text": "rgb(20, 18, 22)",
+        "ink_soft": "rgb(60, 50, 55)",
+        "accent_gold": "rgb(255, 215, 0)",
+        "evidence_border": "rgb(108, 0, 19)",
+    },
+    "typography": {
+        "font_stack": "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+        "title": {"size": "68px", "weight": "900", "line_height": "1.05"},
+        "section": {"size": "56px", "weight": "800", "line_height": "1.1"},
+        "body": {"size": "40px", "weight": "700", "line_height": "1.35"},
+        "caption": {"size": "24px", "weight": "500", "line_height": "1.4"},
+        "cta": {"size": "50px", "weight": "800", "line_height": "1.25"},
+    },
+    "spacing": {
+        "page_padding": "90px",
+        "section_gap": "60px",
+        "card_padding": "40px",
+        "line_gap": "24px",
+    },
+    "animation": {
+        "ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "fade_duration": "0.6s",
+        "slide_duration": "0.8s",
+        "packet_duration": "2.5s",
+    },
+}
+
 PALETTE = {
     # Brand core
     "maroon": "rgb(108, 0, 19)",

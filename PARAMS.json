@@ -1,0 +1,107 @@
+{
+  "_read_me": "The ONLY file you edit for design. Every value is a ratio of W or H unless it is a hex, filename, or seconds. Run `python3 scripts/prepare.py` after editing: it validates against the quality floor and writes tokens into every composition.",
+
+  "series": {
+    "name": "AI for College Students",
+    "handle": "@uttambhartiyaa",
+    "site": "uttambhartiya.in"
+  },
+
+  "format": { "w": 1080, "h": 1920, "fps": 30, "platform": "reels" },
+
+  "safeZone": { "top": 0.0875, "bottom": 0.219 },
+
+  "palette": {
+    "ground":     "#EDE3D6",
+    "ink":        "#0C0A0B",
+    "accent":     "#6F0017",
+    "secondary":  "#CEDBD1",
+    "tertiary":   "#0A172A",
+    "quaternary": "#DCD5E1",
+
+    "paper":      "#FFFDF8",
+    "paperInk":   "#16110F",
+    "paperMuted": "#7A6B60",
+    "paperBar":   "#F1E9DC",
+
+    "onAccent":     "ground",
+    "onTertiary":   "ground",
+    "onQuaternary": "ink",
+    "onInk":        "ground",
+
+    "fieldCycle": ["accent", "ground", "ink", "secondary", "tertiary", "quaternary"]
+  },
+
+  "type": {
+    "display": "Anton",
+    "slab":    "Archivo Black",
+    "mono":    "Space Mono",
+    "files": {
+      "display": "assets/fonts/Anton-Regular.ttf",
+      "slab":    "assets/fonts/ArchivoBlack-Regular.ttf",
+      "mono400": "assets/fonts/SpaceMono-Regular.ttf",
+      "mono700": "assets/fonts/SpaceMono-Bold.ttf"
+    },
+    "heroMin":  0.16,
+    "heroMax":  0.25,
+    "kicker":   0.030,
+    "chip":     0.0333,
+    "bodyMin":  0.026,
+    "lineHeight": 0.88,
+    "trackingLabel": 0.2
+  },
+
+  "grid": {
+    "marginX":        0.056,
+    "kickerTop":      0.0667,
+    "heroTop":        0.1006,
+    "gap":            0.025,
+    "cardTop":        0.301,
+    "cardW":          0.8889,
+    "cardHmin":       0.219,
+    "cardHmax":       0.271,
+    "cardRadius":     16,
+    "chipTop":        0.5875,
+    "chipH":          0.0448,
+    "chipRadius":     999,
+    "presenterTop":   0.634,
+    "presenterHmin":  0.396,
+    "presenterHmax":  0.432,
+    "presenterX":     0.207,
+    "halftone":       0.10,
+    "hardShadow":     "14px 16px 0"
+  },
+
+  "archetype": "auto",
+
+  "presenter": {
+    "enabled": true,
+    "dir": "assets/presenter/cut",
+    "poses": ["p1_shrug.png", "p2_facepalm.png", "p3_present.png", "p4_chin.png",
+              "p5_memory.png", "p6_thumbs.png", "p7_cta.png", "p8_point.png", "p9_idea.png"],
+    "cropByFrame": true,
+    "entry": { "fromScale": 0.92, "fromY": 40, "duration": 0.34, "ease": "power3.out" }
+  },
+
+  "audio": {
+    "voLufs": -16,
+    "masterLufs": -14,
+    "truePeakMax": -1.0,
+    "bedVolume": 0.15,
+    "cueBus": 0.20,
+    "maxCuesPerSecond": 1.0,
+    "tail": 1.15,
+    "leadIn": 0.30,
+    "gap": 0.30
+  },
+
+  "rules": {
+    "maxWordsOnScreen": 8,
+    "heroMaxWords": 4,
+    "chipWords": "3-6",
+    "minHoldSeconds": 0.4,
+    "noBackgroundRepeat": true,
+    "frameZeroIsCover": true,
+    "poseChangesEveryScene": true
+  }
+}
