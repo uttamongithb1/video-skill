@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Premium Video Skill — v3.0 Generator
+Premium Video Skill — v3.2 Generator
 ====================================
 
-Converts a voice script into a premium HyperFrames HTML video.
+Converts a voice script into a premium HyperFrames HTML video with
+kinetic typography, animations, evidence sourcing, AND audio sync.
 
 Features:
   • Script parsing (plain text or [start-end] timestamped segments)
@@ -11,7 +12,7 @@ Features:
   • Kinetic typography (per-word pop/slide/scale animations)
   • Glassmorphism evidence cards + lower thirds + end screens
   • Motion-blur transitions + Ken Burns camera moves
-  • Audio sync cues (whoosh / pop / ding) + voiceover + music markers
+  • Audio sync cues (whoosh/pop/ding) + voiceover + music markers
   • Media download commands (yt-dlp) for evidence sourcing
   • Strict design-contract validation
 
@@ -23,6 +24,11 @@ Usage:
 Then:
     npx hyperframes preview
     npx hyperframes render
+
+Audio pipeline (run after generating HTML):
+    python3 scripts/gen_sfx.py              # synthesize SFX (one-time)
+    python3 scripts/mix_audio.py            # VO + cues + bed → master.wav
+    ffmpeg mux picture + master.wav → final.mp4
 """
 
 from __future__ import annotations
@@ -94,8 +100,11 @@ def main() -> None:
     print("  2. Add voiceover + music to assets/audio/")
     print("  3. Fill data-var-src URLs in evidence cards")
     print("  4. Run media download commands for evidence assets")
-    print("  5. npx hyperframes preview")
-    print("  6. npx hyperframes render")
+    print("  5. Generate SFX: python3 scripts/gen_sfx.py")
+    print("  6. Mix audio:  python3 scripts/mix_audio.py")
+    print("  7. Mux:        ffmpeg -i index_rendered.mp4 -i renders/master.wav -c:v copy -c:a aac -shortest final.mp4")
+    print("  8. Preview:    npx hyperframes preview")
+    print("  9. Render:     npx hyperframes render")
 
 
 if __name__ == "__main__":

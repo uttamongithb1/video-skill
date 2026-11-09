@@ -1,0 +1,40 @@
+{
+  "_read_me": "Sound design lives here. `at` accepts: \"scenes\" (one cue on every scene start), \"<section id>\" (its start), \"<section id>+0.85\" (offset into that section), or an absolute second. Section-relative cues survive a re-record; absolute seconds do not. Keep <= 1 cue per second and never land a cue on a word's first syllable. The bed is instrumental, loop-safe, and set so it measures ~13 LU below the -16 LUFS VO (0.15 on a -12.5 LUFS track = -29 LUFS); no ducking — the gap is the duck.",
+  "bed": {
+    "file": "assets/music/bed.mp3",
+    "volume": 0.15,
+    "fadeIn": 0.8,
+    "fadeOut": 1.6
+  },
+  "cues": [
+    { "at": "scenes", "file": "pop.wav", "gain": 0.5 },
+    { "at": "vo2-0.30", "file": "riser.wav", "gain": 0.3 },
+    { "at": "vo7-0.30", "file": "riser.wav", "gain": 0.28 },
+    { "at": "vo1+0.30", "file": "key.wav", "gain": 0.4 },
+    { "at": "vo1+0.42", "file": "key.wav", "gain": 0.4 },
+    { "at": "vo1+0.54", "file": "key.wav", "gain": 0.4 },
+    { "at": "vo1+0.66", "file": "key.wav", "gain": 0.4 },
+    { "at": "vo1+0.78", "file": "key.wav", "gain": 0.4 },
+    { "at": "vo2+1.10", "file": "click.wav", "gain": 0.38 },
+    { "at": "vo2+1.17", "file": "click.wav", "gain": 0.38 },
+    { "at": "vo2+1.24", "file": "click.wav", "gain": 0.38 },
+    { "at": "vo2+1.31", "file": "click.wav", "gain": 0.38 },
+    { "at": "vo2+1.38", "file": "click.wav", "gain": 0.38 },
+    { "at": "vo3+0.35", "file": "impact.wav", "gain": 0.32 },
+    { "at": "vo4+1.46", "file": "click.wav", "gain": 0.45 },
+    { "at": "vo4+1.62", "file": "ping.wav", "gain": 0.3 },
+    { "at": "vo5+0.85", "file": "key.wav", "gain": 0.3 },
+    { "at": "vo5+1.25", "file": "key.wav", "gain": 0.26 },
+    { "at": "vo5+1.95", "file": "chime.wav", "gain": 0.4 },
+    { "at": "vo6+0.55", "file": "click.wav", "gain": 0.4 },
+    { "at": "vo6+1.05", "file": "key.wav", "gain": 0.28 },
+    { "at": "vo6+1.35", "file": "key.wav", "gain": 0.24 },
+    { "at": "vo7+0.60", "file": "riser.wav", "gain": 0.22 },
+    { "at": "vo7+1.68", "file": "chime.wav", "gain": 0.42 },
+    { "at": "vo8+0.55", "file": "key.wav", "gain": 0.26 },
+    { "at": "vo8+1.55", "file": "chime.wav", "gain": 0.36 },
+    { "at": "vo9+0.55", "file": "notify.wav", "gain": 0.4 },
+    { "at": "vo9+2.30", "file": "ping.wav", "gain": 0.32 },
+    { "at": "vo9+4.20", "file": "chime.wav", "gain": 0.3 }
+  ]
+}
